@@ -1,0 +1,85 @@
+{
+  "targetUsers": [
+    {
+      "id": "USER-001",
+      "name": "Casual Flight Simulation Enthusiast",
+      "description": "A gamer interested in flight simulation experiences who wants to explore real-world locations from the air with intuitive controls and realistic visuals",
+      "painPoints": [
+        "Existing flight simulators are too complex or too unrealistic",
+        "Want to fly over familiar real-world locations with accurate terrain and buildings",
+        "Existing browser-based solutions have poor performance",
+        "Limited sense of speed and maneuverability in many games"
+      ]
+    }
+  ],
+  "coreProblems": [
+    {
+      "id": "PROB-001",
+      "title": "Lack of accessible 3D flight experience over real-world terrain",
+      "description": "Most flight simulators are either too complex for casual users or use low-quality procedural terrain. There's a gap in the market for an accessible flight game that combines realistic real-world terrain and buildings with intuitive controls and strong sense of speed."
+    },
+    {
+      "id": "PROB-002",
+      "title": "Performance limitations of browser-based 3D geospatial applications",
+      "description": "Browser-based 3D mapping applications (like Cesium.js) struggle with performance when rendering large amounts of 3D tiles and terrain data, limiting the potential for smooth flight simulation experiences."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCENARIO-001",
+      "title": "Player explores city from the air",
+      "description": "A player starts the game, loads a scene with real-world terrain (e.g., their home city), and flies an aircraft over familiar landmarks, buildings, and terrain features with smooth controls and realistic physics.",
+      "actors": [
+        "Player",
+        "Game System",
+        "Cesium Terrain/Tileset Servers"
+      ],
+      "problemsSolved": [
+        "PROB-001",
+        "PROB-002"
+      ],
+      "useCases": [
+        "UC-001",
+        "UC-002",
+        "UC-003"
+      ]
+    },
+    {
+      "id": "SCENARIO-002",
+      "title": "Player navigates using flight instruments",
+      "description": "While flying, the player uses the HUD to monitor speed, altitude, and heading to navigate to points of interest or complete objectives.",
+      "actors": [
+        "Player",
+        "HUD System",
+        "Aircraft Controller"
+      ],
+      "problemsSolved": [
+        "PROB-001"
+      ],
+      "useCases": [
+        "UC-001",
+        "UC-003",
+        "UC-004"
+      ]
+    },
+    {
+      "id": "SCENARIO-003",
+      "title": "Player completes mission by reaching waypoints",
+      "description": "The player accepts a mission with defined waypoints, flies the aircraft to each waypoint in sequence, and completes the mission to earn points or unlock new content.",
+      "actors": [
+        "Player",
+        "Mission System",
+        "UI System"
+      ],
+      "problemsSolved": [
+        "PROB-001"
+      ],
+      "useCases": [
+        "UC-001",
+        "UC-003",
+        "UC-004"
+      ]
+    }
+  ],
+  "differentiation": []
+}

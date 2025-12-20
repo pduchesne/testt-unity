@@ -1,0 +1,248 @@
+{
+  "tasks": [
+    {
+      "id": "IMPL-001",
+      "title": "Set up Unity project structure and .gitignore",
+      "description": "Initialize the project structure with proper .gitignore for Unity files and create base documentation",
+      "implements": [
+        "REQ-F001"
+      ],
+      "component": "Project Setup",
+      "priority": "high",
+      "status": "completed",
+      "progress": 100,
+      "dependencies": [],
+      "deliverables": [
+        ".gitignore file",
+        "README.md",
+        "ARCHITECTURE.md",
+        "PROJECT_STATUS.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "IMPL-002",
+      "title": "Create Unity project with Unity 6 or 2022 LTS",
+      "description": "Initialize Unity project using Unity Hub or CLI with 3D Core template",
+      "implements": [
+        "REQ-F001"
+      ],
+      "component": "Unity Project",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-001"
+      ],
+      "deliverables": [
+        "Unity project files",
+        "Assets/ directory",
+        "ProjectSettings/ directory",
+        "Packages/manifest.json"
+      ]
+    },
+    {
+      "id": "IMPL-003",
+      "title": "Install Cesium for Unity plugin",
+      "description": "Add Cesium for Unity package via Package Manager or git URL",
+      "implements": [
+        "REQ-F002"
+      ],
+      "component": "Cesium Integration",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-002"
+      ],
+      "deliverables": [
+        "Cesium package in Packages/manifest.json",
+        "Cesium menu in Unity Editor"
+      ]
+    },
+    {
+      "id": "IMPL-004",
+      "title": "Configure Cesium ion access token",
+      "description": "Create Cesium ion account and configure access token in Unity",
+      "implements": [
+        "REQ-F002"
+      ],
+      "component": "Cesium Integration",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-003"
+      ],
+      "deliverables": [
+        "Cesium ion token configured",
+        "Access to Cesium World Terrain"
+      ]
+    },
+    {
+      "id": "IMPL-005",
+      "title": "Create main scene with Cesium World Terrain",
+      "description": "Set up MainScene.unity with CesiumGeoreference and CesiumWorldTerrain components",
+      "implements": [
+        "REQ-F003"
+      ],
+      "component": "Scene Setup",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-004"
+      ],
+      "deliverables": [
+        "Assets/Scenes/MainScene.unity",
+        "Working terrain streaming"
+      ]
+    },
+    {
+      "id": "IMPL-006",
+      "title": "Implement aircraft controller script",
+      "description": "Create AircraftController.cs with physics-based movement (pitch, roll, yaw, throttle)",
+      "implements": [
+        "REQ-F005"
+      ],
+      "component": "Aircraft System",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-005"
+      ],
+      "deliverables": [
+        "Assets/Scripts/Aircraft/AircraftController.cs",
+        "Aircraft prefab with Rigidbody"
+      ]
+    },
+    {
+      "id": "IMPL-007",
+      "title": "Set up Unity Input System",
+      "description": "Install Unity Input System package and create input action maps for flight controls",
+      "implements": [
+        "REQ-F006"
+      ],
+      "component": "Input System",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-002"
+      ],
+      "deliverables": [
+        "Input System package installed",
+        "FlightControls.inputactions asset",
+        "Keyboard/gamepad bindings"
+      ]
+    },
+    {
+      "id": "IMPL-008",
+      "title": "Add camera rig with smooth follow",
+      "description": "Create CameraRig.cs with smooth following, banking effects, and configurable lag",
+      "implements": [
+        "REQ-F007"
+      ],
+      "component": "Camera System",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-006"
+      ],
+      "deliverables": [
+        "Assets/Scripts/Camera/CameraRig.cs",
+        "Camera prefab with follow script"
+      ]
+    },
+    {
+      "id": "IMPL-009",
+      "title": "Load sample 3D tileset for buildings",
+      "description": "Add Cesium3DTileset component to scene and configure it to stream OSM Buildings or Google 3D Tiles",
+      "implements": [
+        "REQ-F004"
+      ],
+      "component": "3D Tiles Streaming",
+      "priority": "medium",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-005"
+      ],
+      "deliverables": [
+        "Cesium3DTileset in scene",
+        "Visible 3D buildings",
+        "Performance validation"
+      ]
+    },
+    {
+      "id": "IMPL-010",
+      "title": "Create basic HUD canvas",
+      "description": "Implement FlightHUD.cs with UI elements for speed, altitude, and heading display",
+      "implements": [
+        "REQ-F008"
+      ],
+      "component": "UI System",
+      "priority": "medium",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-006"
+      ],
+      "deliverables": [
+        "Assets/Scripts/UI/FlightHUD.cs",
+        "HUD Canvas prefab",
+        "Speed, altitude, heading indicators"
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "title": "PoC - Basic Flight & Terrain Complete",
+      "phaseId": "PHASE-1",
+      "status": "in-progress",
+      "tasks": [
+        "IMPL-001",
+        "IMPL-002",
+        "IMPL-003",
+        "IMPL-004",
+        "IMPL-005",
+        "IMPL-006",
+        "IMPL-007",
+        "IMPL-008",
+        "IMPL-009",
+        "IMPL-010"
+      ]
+    },
+    {
+      "id": "M2",
+      "title": "Flight Mechanics Complete",
+      "phaseId": "PHASE-2",
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "M3",
+      "title": "Dynamic Content Loading Complete",
+      "phaseId": "PHASE-3",
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "M4",
+      "title": "Game Features Complete",
+      "phaseId": "PHASE-4",
+      "status": "pending",
+      "tasks": []
+    },
+    {
+      "id": "M5",
+      "title": "Polish & Release Ready",
+      "phaseId": "PHASE-5",
+      "status": "pending",
+      "tasks": []
+    }
+  ]
+}

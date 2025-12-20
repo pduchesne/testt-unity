@@ -1,0 +1,54 @@
+[
+  {
+    "id": "UC-001",
+    "title": "Fly aircraft over terrain",
+    "keywords": [
+      "flight",
+      "terrain",
+      "navigation",
+      "movement"
+    ],
+    "parent": null,
+    "description": "Fly aircraft over terrain",
+    "priority": "medium"
+  },
+  {
+    "id": "UC-002",
+    "title": "View real-world buildings while flying",
+    "keywords": [
+      "3D tiles",
+      "buildings",
+      "streaming",
+      "visualization"
+    ],
+    "parent": null,
+    "description": "View real-world buildings while flying",
+    "priority": "medium"
+  },
+  {
+    "id": "UC-003",
+    "title": "Control aircraft with keyboard/gamepad",
+    "keywords": [
+      "input",
+      "controls",
+      "keyboard",
+      "gamepad"
+    ],
+    "parent": null,
+    "description": "Control aircraft with keyboard/gamepad",
+    "priority": "medium"
+  },
+  {
+    "id": "UC-004",
+    "title": "See flight information on HUD",
+    "keywords": [
+      "HUD",
+      "UI",
+      "instruments",
+      "feedback"
+    ],
+    "parent": null,
+    "description": "See flight information on HUD",
+    "priority": "medium"
+  }
+]

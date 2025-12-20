@@ -1,0 +1,78 @@
+[
+  {
+    "id": "REQ-F001",
+    "title": "Unity project initialization",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001",
+      "UC-002",
+      "UC-003",
+      "UC-004"
+    ]
+  },
+  {
+    "id": "REQ-F002",
+    "title": "Cesium for Unity integration",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001",
+      "UC-002"
+    ]
+  },
+  {
+    "id": "REQ-F003",
+    "title": "Real-world terrain streaming",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001"
+    ]
+  },
+  {
+    "id": "REQ-F004",
+    "title": "3D building tileset streaming",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-002"
+    ]
+  },
+  {
+    "id": "REQ-F005",
+    "title": "Aircraft physics-based movement",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001"
+    ]
+  },
+  {
+    "id": "REQ-F006",
+    "title": "Keyboard/gamepad input handling",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-003"
+    ]
+  },
+  {
+    "id": "REQ-F007",
+    "title": "Smooth camera follow system",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001"
+    ]
+  },
+  {
+    "id": "REQ-F008",
+    "title": "Flight instruments HUD",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-004"
+    ]
+  }
+]

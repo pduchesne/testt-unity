@@ -1,0 +1,151 @@
+{
+  "phases": [
+    {
+      "id": "PHASE-1",
+      "title": "PoC - Basic Flight & Terrain",
+      "description": "Demonstrate feasibility of 3D engine with real-world terrain and basic flight controls",
+      "duration": "1-2 weeks",
+      "goal": "Flyable demo with real-world terrain at 60 FPS",
+      "scenarios": [
+        "SCENARIO-001"
+      ],
+      "functionalRequirements": [
+        "REQ-F001",
+        "REQ-F002",
+        "REQ-F003",
+        "REQ-F004",
+        "REQ-F005",
+        "REQ-F006",
+        "REQ-F007",
+        "REQ-F008"
+      ],
+      "successCriteria": [
+        "Unity project runs without errors",
+        "Terrain loads from Cesium World Terrain or WMTS",
+        "Aircraft can be controlled with keyboard",
+        "Camera follows aircraft smoothly",
+        "Performance: 60 FPS on target hardware",
+        "3D building tileset loads successfully"
+      ],
+      "implementationTasks": [
+        "IMPL-001",
+        "IMPL-002",
+        "IMPL-003",
+        "IMPL-004",
+        "IMPL-005",
+        "IMPL-006",
+        "IMPL-007",
+        "IMPL-008",
+        "IMPL-009",
+        "IMPL-010"
+      ],
+      "milestones": [
+        "M1"
+      ],
+      "status": "in-progress"
+    },
+    {
+      "id": "PHASE-2",
+      "title": "Flight Mechanics",
+      "description": "Implement realistic flight physics and controls with advanced camera effects",
+      "duration": "2-3 weeks",
+      "goal": "Realistic flight physics and controls with comprehensive HUD",
+      "scenarios": [
+        "SCENARIO-002"
+      ],
+      "functionalRequirements": [
+        "REQ-F005",
+        "REQ-F006",
+        "REQ-F007",
+        "REQ-F008"
+      ],
+      "successCriteria": [
+        "Physics-based movement implemented",
+        "Realistic pitch, roll, yaw controls",
+        "Speed and altitude control working",
+        "Terrain collision detection functional",
+        "HUD with flight instruments complete",
+        "Camera effects (motion blur, dynamic FOV) implemented"
+      ],
+      "implementationTasks": [],
+      "milestones": [
+        "M2"
+      ]
+    },
+    {
+      "id": "PHASE-3",
+      "title": "Dynamic Content Loading",
+      "description": "Optimize streaming from multiple sources with dynamic LOD management",
+      "duration": "2-3 weeks",
+      "goal": "Optimized streaming from multiple 3D Tileset and WMTS sources",
+      "scenarios": [
+        "SCENARIO-001"
+      ],
+      "functionalRequirements": [
+        "REQ-F003",
+        "REQ-F004"
+      ],
+      "successCriteria": [
+        "Multiple 3D Tileset sources supported",
+        "Custom WMTS terrain support implemented",
+        "Dynamic LOD management working",
+        "Memory and bandwidth optimized",
+        "Loading indicators functional"
+      ],
+      "implementationTasks": [],
+      "milestones": [
+        "M3"
+      ]
+    },
+    {
+      "id": "PHASE-4",
+      "title": "Game Features",
+      "description": "Implement gameplay elements including missions, waypoints, and audio",
+      "duration": "3-4 weeks",
+      "goal": "Playable game with objectives and complete game loop",
+      "scenarios": [
+        "SCENARIO-003"
+      ],
+      "functionalRequirements": [
+        "REQ-F008"
+      ],
+      "successCriteria": [
+        "Mission/objective system implemented",
+        "Waypoints and POIs working",
+        "Weather effects added",
+        "Audio system (engine, wind) functional",
+        "Settings UI complete",
+        "Score/progression system working"
+      ],
+      "implementationTasks": [],
+      "milestones": [
+        "M4"
+      ]
+    },
+    {
+      "id": "PHASE-5",
+      "title": "Polish & Release",
+      "description": "Final optimization, bug fixes, and deployment preparation",
+      "duration": "2 weeks",
+      "goal": "Production-ready game with optimized performance",
+      "scenarios": [
+        "SCENARIO-001",
+        "SCENARIO-002",
+        "SCENARIO-003"
+      ],
+      "functionalRequirements": [],
+      "successCriteria": [
+        "Performance profiling complete",
+        "All critical bugs fixed",
+        "Visual polish applied",
+        "Build pipeline established",
+        "Documentation complete",
+        "Deployment packages created"
+      ],
+      "implementationTasks": [],
+      "milestones": [
+        "M5"
+      ]
+    }
+  ]
+}

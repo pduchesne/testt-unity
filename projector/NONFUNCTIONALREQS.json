@@ -1,0 +1,22 @@
+[
+  {
+    "id": "REQ-NF001",
+    "title": "60 FPS performance on target hardware",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001",
+      "UC-002"
+    ]
+  },
+  {
+    "id": "REQ-NF002",
+    "title": "Memory budget under 1GB VRAM",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-001",
+      "UC-002"
+    ]
+  }
+]
