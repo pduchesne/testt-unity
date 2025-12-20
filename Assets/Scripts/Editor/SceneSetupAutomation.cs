@@ -157,12 +157,12 @@ namespace GeoGame3D.Editor
             Debug.Log("Setting up Camera...");
 
             // Find main camera
-            Camera mainCamera = Camera.main;
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             if (mainCamera == null)
             {
                 // Create camera if it doesn't exist
                 GameObject cameraObj = new GameObject("Main Camera");
-                mainCamera = cameraObj.AddComponent<Camera>();
+                mainCamera = cameraObj.AddComponent<UnityEngine.Camera>();
                 cameraObj.tag = "MainCamera";
                 cameraObj.AddComponent<AudioListener>();
             }
