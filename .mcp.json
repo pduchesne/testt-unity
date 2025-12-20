@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "project-graph": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "../project-graph-service/packages/service",
+        "mcp"
+      ],
+      "env": {}
+    },
+
+    "process-runner": {
+      "command": "node",
+      "args": ["../mcp-process-runner/dist/index.js"]
+    },
+
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ]
+    }
+  }
+}

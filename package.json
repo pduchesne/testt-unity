@@ -1,0 +1,26 @@
+{
+  "name": "geogame3d",
+  "version": "0.1.0",
+  "description": "3D Flight Simulation Game with Unity and Cesium",
+  "private": true,
+  "scripts": {
+    "build-info": "git-build-info"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pduchesne/geogame3d.git"
+  },
+  "keywords": [
+    "unity",
+    "cesium",
+    "3d",
+    "flight",
+    "simulation",
+    "game"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "git-build-info": "github:pduchesne/git-build-info"
+  }
+}
