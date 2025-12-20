@@ -35,7 +35,7 @@ namespace GeoGame3D.Aircraft
         private float currentThrottle = 0.5f;
 
         // Public properties for HUD
-        public float Speed => rb.velocity.magnitude;
+        public float Speed => rb.linearVelocity.magnitude;
         public float Altitude { get; private set; }
         public float Heading => transform.eulerAngles.y;
         public float ThrottlePercent => currentThrottle * 100f;
@@ -44,14 +44,14 @@ namespace GeoGame3D.Aircraft
         {
             rb = GetComponent<Rigidbody>();
             rb.useGravity = false; // We'll handle our own physics
-            rb.drag = drag;
-            rb.angularDrag = angularDrag;
+            rb.linearDamping = drag;
+            rb.angularDamping = angularDrag;
         }
 
         private void Start()
         {
             // Set initial velocity
-            rb.velocity = transform.forward * maxSpeed * currentThrottle;
+            rb.linearVelocity = transform.forward * maxSpeed * currentThrottle;
         }
 
         private void FixedUpdate()
@@ -74,7 +74,7 @@ namespace GeoGame3D.Aircraft
 
             // Apply forward thrust
             Vector3 targetVelocity = transform.forward * targetSpeed;
-            Vector3 velocityDelta = targetVelocity - rb.velocity;
+            Vector3 velocityDelta = targetVelocity - rb.linearVelocity;
             Vector3 force = velocityDelta * acceleration;
 
             rb.AddForce(force, ForceMode.Acceleration);
@@ -138,7 +138,7 @@ namespace GeoGame3D.Aircraft
             {
                 // Draw velocity vector
                 Gizmos.color = Color.green;
-                Gizmos.DrawRay(transform.position, rb.velocity);
+                Gizmos.DrawRay(transform.position, rb.linearVelocity);
 
                 // Draw forward direction
                 Gizmos.color = Color.blue;
