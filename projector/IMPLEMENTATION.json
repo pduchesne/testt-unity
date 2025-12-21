@@ -280,6 +280,53 @@
         "AOA indicator",
         "G-force meter"
       ]
+    },
+    {
+      "id": "IMPL-015",
+      "title": "Create realistic sprite-based gauge visuals",
+      "description": "Replace current minimal gauge design with realistic sprite-based instruments using AI-generated or sourced gauge textures. Implement rotating needle pointers, layered gauge faces (bezel, face, needle, glass), and classical aviation instrument styling for speed, altitude, throttle, and heading gauges.",
+      "implements": [
+        "REQ-F008"
+      ],
+      "component": "UI System",
+      "priority": "medium",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-014"
+      ],
+      "deliverables": [
+        "AI-generated gauge face sprites (speed, altitude, throttle, heading)",
+        "Needle/pointer sprites for each gauge",
+        "Bezel and glass overlay sprites",
+        "Enhanced CircularGauge.cs with needle rotation support",
+        "Documentation: AI prompts for gauge generation (Leonardo.ai/Stable Diffusion)",
+        "Documentation: Sprite import settings and setup guide",
+        "Integration with existing FlightHUD component"
+      ]
+    },
+    {
+      "id": "IMPL-016",
+      "title": "Implement 3D tileset selection and overlay system",
+      "description": "Create a system to allow selection and loading of various 3D tilesets (ArcGIS, Cesium, etc.) that can be overlaid on the globe. Include a tileset manager UI, support for multiple tileset providers, and automatic aircraft positioning on top of the selected tileset.",
+      "implements": [
+        "REQ-F004"
+      ],
+      "component": "3D Tiles Streaming",
+      "priority": "high",
+      "status": "completed",
+      "progress": 100,
+      "dependencies": [
+        "IMPL-009"
+      ],
+      "deliverables": [
+        "TilesetManager.cs script",
+        "TilesetSelector UI component",
+        "Support for ArcGIS 3D Tiles",
+        "Support for Cesium ion tilesets",
+        "Automatic aircraft positioning system",
+        "Utrecht 3D tileset integration"
+      ]
     }
   ],
   "milestones": [
