@@ -12,9 +12,10 @@ namespace GeoGame3D.Camera
 
         [Header("Follow Settings")]
         [SerializeField] private Vector3 offset = new Vector3(0f, 5f, -15f);
-        [SerializeField] private float followSpeed = 3f;
-        [SerializeField] private float rotationSpeed = 2f;
+        [SerializeField] private float followSpeed = 5f;
+        [SerializeField] private float rotationSpeed = 4f;
         [SerializeField] private float maxAngularVelocity = 180f; // degrees/s
+        [SerializeField] private bool followVelocity = true; // Follow velocity vector instead of forward
 
         [Header("Banking Effect")]
         [SerializeField] private bool enableBanking = true;
@@ -30,6 +31,7 @@ namespace GeoGame3D.Camera
         private UnityEngine.Camera cam;
         private GeoGame3D.Aircraft.AircraftController aircraft;
         private Quaternion lastRotation;
+        private Rigidbody targetRigidbody;
 
         private void Awake()
         {
@@ -48,6 +50,7 @@ namespace GeoGame3D.Camera
             if (target != null)
             {
                 aircraft = target.GetComponent<GeoGame3D.Aircraft.AircraftController>();
+                targetRigidbody = target.GetComponent<Rigidbody>();
             }
 
             if (target == null)
@@ -71,8 +74,23 @@ namespace GeoGame3D.Camera
 
         private void UpdatePosition()
         {
-            // Calculate desired position based on target's rotation and offset
-            Vector3 desiredPosition = target.position + target.rotation * offset;
+            // Determine which direction to use for camera positioning
+            Quaternion referenceRotation;
+
+            if (followVelocity && targetRigidbody != null && targetRigidbody.linearVelocity.sqrMagnitude > 1f)
+            {
+                // Use velocity direction (where the aircraft is actually moving)
+                Vector3 velocityDirection = targetRigidbody.linearVelocity.normalized;
+                referenceRotation = Quaternion.LookRotation(velocityDirection);
+            }
+            else
+            {
+                // Fall back to aircraft's forward direction at low speeds
+                referenceRotation = target.rotation;
+            }
+
+            // Calculate desired position based on reference rotation and offset
+            Vector3 desiredPosition = target.position + referenceRotation * offset;
 
             // Smoothly move camera to desired position
             transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
@@ -125,6 +143,7 @@ namespace GeoGame3D.Camera
             if (target != null)
             {
                 aircraft = target.GetComponent<GeoGame3D.Aircraft.AircraftController>();
+                targetRigidbody = target.GetComponent<Rigidbody>();
             }
         }
 
