@@ -39,14 +39,30 @@ namespace GeoGame3D.UI
                 {
                     Debug.LogError("FlightHUD: No AircraftController found in scene!");
                 }
+                else
+                {
+                    Debug.Log($"FlightHUD: Found AircraftController via FindObjectOfType");
+                }
+            }
+            else
+            {
+                Debug.Log($"FlightHUD: AircraftController already assigned in Inspector");
             }
 
             ValidateUIElements();
+            Debug.Log("FlightHUD: Start() complete");
         }
 
         private void Update()
         {
-            if (aircraft == null) return;
+            if (aircraft == null)
+            {
+                if (Time.frameCount % 60 == 0) // Log every 60 frames
+                {
+                    Debug.LogWarning("FlightHUD: Aircraft reference is null in Update()");
+                }
+                return;
+            }
 
             UpdateSpeed();
             UpdateAltitude();
