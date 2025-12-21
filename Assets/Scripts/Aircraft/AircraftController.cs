@@ -22,8 +22,8 @@ namespace GeoGame3D.Aircraft
 
         [Header("Aerodynamics")]
         [SerializeField] private float wingArea = 35f; // m²
-        [SerializeField] private float baseDragCoefficient = 0.08f; // Increased for better speed control
-        [SerializeField] private float inducedDragFactor = 0.08f; // Increased drag from lift
+        [SerializeField] private float baseDragCoefficient = 0.25f; // High drag for speed control
+        [SerializeField] private float inducedDragFactor = 0.12f; // Drag from lift generation
         [SerializeField] private AnimationCurve liftCurve = AnimationCurve.Linear(-15f, -0.5f, 15f, 1.5f);
         [SerializeField] private float stallAngle = 20f; // degrees
         [SerializeField] private float stallLiftMultiplier = 0.5f; // Lift multiplier when stalled
@@ -151,13 +151,6 @@ namespace GeoGame3D.Aircraft
 
             // 4. Gravity
             Vector3 gravityForce = Vector3.down * (rb.mass * gravity);
-
-            // Debug logging
-            if (Time.frameCount % 60 == 0) // Log every 60 frames
-            {
-                Debug.Log($"Speed: {speed:F1} m/s | AOA: {angleOfAttack:F1}° | CL: {liftCoefficient:F2} | Lift: {liftForce:F0}N | Gravity: {gravityForce.magnitude:F0}N | Stalled: {isStalled}");
-                Debug.Log($"Lift Dir: {liftDirection} | Lift Vector Y: {lift.y:F0}N | Gravity: {gravityForce.y:F0}N | Net Y: {(lift.y + thrust.y + drag.y + gravityForce.y):F0}N");
-            }
 
             // Apply all forces
             rb.AddForce(thrust + lift + drag + gravityForce);
