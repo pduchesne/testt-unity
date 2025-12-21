@@ -22,8 +22,8 @@ namespace GeoGame3D.Aircraft
 
         [Header("Aerodynamics")]
         [SerializeField] private float wingArea = 35f; // m²
-        [SerializeField] private float baseDragCoefficient = 0.02f;
-        [SerializeField] private float inducedDragFactor = 0.05f;
+        [SerializeField] private float baseDragCoefficient = 0.08f; // Increased for better speed control
+        [SerializeField] private float inducedDragFactor = 0.08f; // Increased drag from lift
         [SerializeField] private AnimationCurve liftCurve = AnimationCurve.Linear(-15f, -0.5f, 15f, 1.5f);
         [SerializeField] private float stallAngle = 20f; // degrees
         [SerializeField] private float stallLiftMultiplier = 0.5f; // Lift multiplier when stalled
