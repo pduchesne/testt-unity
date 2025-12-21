@@ -1451,13 +1451,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GeoGame3D.Camera.CameraRig
   target: {fileID: 1329578265}
-  offset: {x: 0, y: 5, z: -15}
+  baseOffset: {x: 0, y: 5, z: -15}
   followSpeed: 5
   rotationSpeed: 3
   maxDeviationAngle: 30
   minDistance: 10
   centeringSpeed: 2
   centeringThreshold: 20
+  enableDynamicDistance: 1
+  minSpeedForDistance: 30
+  maxSpeedForDistance: 150
+  distanceMultiplier: 1.5
   enableBanking: 1
   bankAmount: 0.3
   enableDynamicFOV: 1

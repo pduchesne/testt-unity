@@ -101,8 +101,11 @@ namespace GeoGame3D.Aircraft
         private void CalculateAerodynamics()
         {
             // Calculate angle of attack
+            // AOA is the angle between the aircraft's longitudinal axis and the relative wind
+            // When nose is UP relative to velocity, localVelocity.y is negative (wind from below)
+            // We negate to get positive AOA when nose is up
             Vector3 localVelocity = transform.InverseTransformDirection(rb.linearVelocity);
-            angleOfAttack = Mathf.Atan2(localVelocity.y, localVelocity.z) * Mathf.Rad2Deg;
+            angleOfAttack = -Mathf.Atan2(localVelocity.y, localVelocity.z) * Mathf.Rad2Deg;
 
             // Check for stall condition
             isStalled = Mathf.Abs(angleOfAttack) > stallAngle || Speed < 20f;
@@ -148,6 +151,13 @@ namespace GeoGame3D.Aircraft
 
             // 4. Gravity
             Vector3 gravityForce = Vector3.down * (rb.mass * gravity);
+
+            // Debug logging
+            if (Time.frameCount % 60 == 0) // Log every 60 frames
+            {
+                Debug.Log($"Speed: {speed:F1} m/s | AOA: {angleOfAttack:F1}° | CL: {liftCoefficient:F2} | Lift: {liftForce:F0}N | Gravity: {gravityForce.magnitude:F0}N | Stalled: {isStalled}");
+                Debug.Log($"Lift Dir: {liftDirection} | Lift Vector Y: {lift.y:F0}N | Gravity: {gravityForce.y:F0}N | Net Y: {(lift.y + thrust.y + drag.y + gravityForce.y):F0}N");
+            }
 
             // Apply all forces
             rb.AddForce(thrust + lift + drag + gravityForce);
