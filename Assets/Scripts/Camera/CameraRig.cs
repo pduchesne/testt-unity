@@ -12,8 +12,9 @@ namespace GeoGame3D.Camera
 
         [Header("Follow Settings")]
         [SerializeField] private Vector3 offset = new Vector3(0f, 5f, -15f);
-        [SerializeField] private float followSpeed = 5f;
-        [SerializeField] private float rotationSpeed = 3f;
+        [SerializeField] private float followSpeed = 3f;
+        [SerializeField] private float rotationSpeed = 2f;
+        [SerializeField] private float maxAngularVelocity = 180f; // degrees/s
 
         [Header("Banking Effect")]
         [SerializeField] private bool enableBanking = true;
@@ -28,6 +29,7 @@ namespace GeoGame3D.Camera
 
         private UnityEngine.Camera cam;
         private GeoGame3D.Aircraft.AircraftController aircraft;
+        private Quaternion lastRotation;
 
         private void Awake()
         {
@@ -37,6 +39,8 @@ namespace GeoGame3D.Camera
             {
                 cam.fieldOfView = baseFOV;
             }
+
+            lastRotation = transform.rotation;
         }
 
         private void Start()
@@ -91,8 +95,13 @@ namespace GeoGame3D.Camera
                 desiredRotation *= Quaternion.Euler(bankRotation);
             }
 
-            // Smoothly rotate camera
-            transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationSpeed * Time.deltaTime);
+            // Limit rotation speed to prevent camera spinning wildly
+            float maxRotation = maxAngularVelocity * Time.deltaTime;
+            Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, desiredRotation, maxRotation);
+
+            // Apply smooth interpolation
+            transform.rotation = Quaternion.Slerp(transform.rotation, newRotation, rotationSpeed * Time.deltaTime);
+            lastRotation = transform.rotation;
         }
 
         private void UpdateDynamicFOV()

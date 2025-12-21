@@ -671,6 +671,7 @@ MonoBehaviour:
   offset: {x: 0, y: 5, z: -15}
   followSpeed: 5
   rotationSpeed: 3
+  maxAngularVelocity: 180
   enableBanking: 1
   bankAmount: 0.3
   enableDynamicFOV: 1
@@ -1111,7 +1112,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
