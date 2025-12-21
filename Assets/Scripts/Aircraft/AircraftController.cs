@@ -132,7 +132,9 @@ namespace GeoGame3D.Aircraft
             angleOfAttack = -Mathf.Atan2(localVelocity.y, localVelocity.z) * Mathf.Rad2Deg;
 
             // Check for stall condition
-            isStalled = Mathf.Abs(angleOfAttack) > stallAngle || Speed < 20f;
+            // Only check stall if airborne (altitude > 5m) and speed conditions met
+            bool isAirborne = Altitude > 5f;
+            isStalled = isAirborne && (Mathf.Abs(angleOfAttack) > stallAngle || Speed < 15f);
         }
 
         private void ApplyAerodynamicForces()
