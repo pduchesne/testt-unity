@@ -15,6 +15,9 @@ namespace GeoGame3D.Camera
         [SerializeField] private float followSpeed = 8f;
         [SerializeField] private float rotationSpeed = 6f;
         [SerializeField] private float maxDeviationAngle = 30f; // Max degrees camera can deviate from aircraft axis
+        [SerializeField] private float minDistance = 10f; // Minimum distance from aircraft
+        [SerializeField] private float centeringSpeed = 2f; // Speed at which camera returns to center when not turning
+        [SerializeField] private float centeringThreshold = 20f; // Angular velocity below which centering activates (deg/s)
 
         [Header("Banking Effect")]
         [SerializeField] private bool enableBanking = true;
@@ -73,12 +76,21 @@ namespace GeoGame3D.Camera
 
         private void UpdatePosition()
         {
-            // Calculate ideal position behind aircraft's forward axis
+            // Calculate ideal centered position behind aircraft's forward axis
             Quaternion aircraftRotation = target.rotation;
-            Vector3 idealPosition = target.position + aircraftRotation * offset;
+            Vector3 idealCenteredPosition = target.position + aircraftRotation * offset;
+
+            // Check if aircraft is turning (based on angular velocity)
+            bool isTurning = targetRigidbody != null && targetRigidbody.angularVelocity.magnitude * Mathf.Rad2Deg > centeringThreshold;
 
             // Smoothly move toward ideal position
-            Vector3 smoothedPosition = Vector3.Lerp(transform.position, idealPosition, followSpeed * Time.deltaTime);
+            Vector3 smoothedPosition = Vector3.Lerp(transform.position, idealCenteredPosition, followSpeed * Time.deltaTime);
+
+            // Auto-center when not turning: pull camera back to centerline
+            if (!isTurning)
+            {
+                smoothedPosition = Vector3.Lerp(smoothedPosition, idealCenteredPosition, centeringSpeed * Time.deltaTime);
+            }
 
             // Apply angular constraint: limit deviation from aircraft axis
             Vector3 fromAircraft = smoothedPosition - target.position;
@@ -93,6 +105,13 @@ namespace GeoGame3D.Camera
                 // Project camera position onto a cone around the aircraft's backward axis
                 Vector3 constrainedDirection = Vector3.RotateTowards(aircraftBackward, fromAircraft.normalized, maxDeviationAngle * Mathf.Deg2Rad, 0f);
                 smoothedPosition = target.position + constrainedDirection * fromAircraft.magnitude;
+            }
+
+            // Apply minimum distance constraint
+            float currentDistance = fromAircraft.magnitude;
+            if (currentDistance < minDistance)
+            {
+                smoothedPosition = target.position + fromAircraft.normalized * minDistance;
             }
 
             transform.position = smoothedPosition;

@@ -1454,8 +1454,7 @@ MonoBehaviour:
   offset: {x: 0, y: 5, z: -15}
   followSpeed: 5
   rotationSpeed: 3
-  maxAngularVelocity: 180
-  followVelocity: 1
+  maxDeviationAngle: 30
   enableBanking: 1
   bankAmount: 0.3
   enableDynamicFOV: 1
