@@ -195,6 +195,91 @@
         "HUD Canvas prefab",
         "Speed, altitude, heading indicators"
       ]
+    },
+    {
+      "id": "IMPL-011",
+      "title": "Add realistic aerodynamics with lift and drag",
+      "description": "Implement lift coefficient based on airspeed and angle of attack, add form drag and induced drag, implement wing area and air density calculations for realistic flight physics",
+      "implements": [
+        "REQ-F005"
+      ],
+      "component": "Aircraft System",
+      "priority": "high",
+      "status": "completed",
+      "progress": 100,
+      "dependencies": [
+        "IMPL-006"
+      ],
+      "deliverables": [
+        "Enhanced AircraftController.cs with aerodynamics",
+        "Configurable wing area and lift coefficient",
+        "Drag calculation system"
+      ]
+    },
+    {
+      "id": "IMPL-012",
+      "title": "Implement stall mechanics and angle of attack",
+      "description": "Add stall conditions when airspeed is too low or angle of attack is too high, implement stall recovery mechanics, add visual and audio feedback for stall warning",
+      "implements": [
+        "REQ-F005"
+      ],
+      "component": "Aircraft System",
+      "priority": "high",
+      "status": "completed",
+      "progress": 100,
+      "dependencies": [
+        "IMPL-011"
+      ],
+      "deliverables": [
+        "Stall detection system",
+        "Angle of attack calculation",
+        "Stall warning HUD indicator"
+      ]
+    },
+    {
+      "id": "IMPL-013",
+      "title": "Add flight assist modes",
+      "description": "Implement altitude hold, heading hold, and level flight assist modes that can be toggled on/off to help stabilize the aircraft",
+      "implements": [
+        "REQ-F005"
+      ],
+      "component": "Aircraft System",
+      "priority": "medium",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-011"
+      ],
+      "deliverables": [
+        "FlightAssist.cs component",
+        "Altitude hold autopilot",
+        "Heading hold autopilot",
+        "Level flight stabilization",
+        "HUD indicators for active assists"
+      ]
+    },
+    {
+      "id": "IMPL-014",
+      "title": "Enhance HUD with additional flight instruments",
+      "description": "Add attitude indicator, vertical speed indicator, angle of attack indicator, and G-force meter to the HUD",
+      "implements": [
+        "REQ-F008"
+      ],
+      "component": "UI System",
+      "priority": "medium",
+      "status": "pending",
+      "progress": 0,
+      "dependencies": [
+        "IMPL-010",
+        "IMPL-011"
+      ],
+      "deliverables": [
+        "Enhanced FlightHUD.cs",
+        "Attitude indicator UI",
+        "Vertical speed indicator",
+        "AOA indicator",
+        "G-force meter"
+      ]
     }
   ],
   "milestones": [
@@ -202,7 +287,7 @@
       "id": "M1",
       "title": "PoC - Basic Flight & Terrain Complete",
       "phaseId": "PHASE-1",
-      "status": "in-progress",
+      "status": "completed",
       "tasks": [
         "IMPL-001",
         "IMPL-002",
@@ -220,8 +305,13 @@
       "id": "M2",
       "title": "Flight Mechanics Complete",
       "phaseId": "PHASE-2",
-      "status": "pending",
-      "tasks": []
+      "status": "in-progress",
+      "tasks": [
+        "IMPL-011",
+        "IMPL-012",
+        "IMPL-013",
+        "IMPL-014"
+      ]
     },
     {
       "id": "M3",

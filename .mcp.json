@@ -22,6 +22,16 @@
         "-y",
         "@executeautomation/playwright-mcp-server"
       ]
+    },
+
+    "Unity-MCP": {
+      "type": "stdio",
+      "command": "/home/pduchesne/Sources/claude/hilats/geogame3d/Library/mcp-server/linux-x64/unity-mcp-server",
+      "args": [
+        "--port=9050",
+        "--plugin-timeout=10000",
+        "--client-transport=stdio"
+      ]
     }
   }
 }
