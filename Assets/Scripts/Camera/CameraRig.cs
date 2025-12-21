@@ -74,20 +74,9 @@ namespace GeoGame3D.Camera
 
         private void UpdatePosition()
         {
-            // Determine which direction to use for camera positioning
-            Quaternion referenceRotation;
-
-            if (followVelocity && targetRigidbody != null && targetRigidbody.linearVelocity.sqrMagnitude > 1f)
-            {
-                // Use velocity direction (where the aircraft is actually moving)
-                Vector3 velocityDirection = targetRigidbody.linearVelocity.normalized;
-                referenceRotation = Quaternion.LookRotation(velocityDirection);
-            }
-            else
-            {
-                // Fall back to aircraft's forward direction at low speeds
-                referenceRotation = target.rotation;
-            }
+            // Determine which direction to use for camera positioning and rotation
+            Vector3 lookDirection = GetLookDirection();
+            Quaternion referenceRotation = Quaternion.LookRotation(lookDirection);
 
             // Calculate desired position based on reference rotation and offset
             Vector3 desiredPosition = target.position + referenceRotation * offset;
@@ -98,8 +87,11 @@ namespace GeoGame3D.Camera
 
         private void UpdateRotation()
         {
-            // Look at target
-            Quaternion desiredRotation = Quaternion.LookRotation(target.position - transform.position);
+            // Get the direction we should be looking (velocity or forward)
+            Vector3 lookDirection = GetLookDirection();
+
+            // Camera should look forward in the direction of travel
+            Quaternion desiredRotation = Quaternion.LookRotation(lookDirection);
 
             // Apply banking effect if enabled
             if (enableBanking)
@@ -120,6 +112,21 @@ namespace GeoGame3D.Camera
             // Apply smooth interpolation
             transform.rotation = Quaternion.Slerp(transform.rotation, newRotation, rotationSpeed * Time.deltaTime);
             lastRotation = transform.rotation;
+        }
+
+        private Vector3 GetLookDirection()
+        {
+            // Determine which direction to use for camera alignment
+            if (followVelocity && targetRigidbody != null && targetRigidbody.linearVelocity.sqrMagnitude > 1f)
+            {
+                // Use velocity direction (where the aircraft is actually moving)
+                return targetRigidbody.linearVelocity.normalized;
+            }
+            else
+            {
+                // Fall back to aircraft's forward direction at low speeds
+                return target.forward;
+            }
         }
 
         private void UpdateDynamicFOV()
