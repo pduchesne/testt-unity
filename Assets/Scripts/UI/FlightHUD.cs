@@ -25,6 +25,16 @@ namespace GeoGame3D.UI
         [SerializeField] private TextMeshProUGUI gForceText;
         [SerializeField] private TextMeshProUGUI stallWarningText;
 
+        [Header("Visual Gauges")]
+        [SerializeField] private ArtificialHorizon artificialHorizon;
+        [SerializeField] private CircularGauge speedGauge;
+        [SerializeField] private CircularGauge altitudeGauge;
+        [SerializeField] private HeadingCompass headingCompass;
+        [SerializeField] private CircularGauge throttleGauge;
+        [SerializeField] private CircularGauge verticalSpeedGauge;
+        [SerializeField] private CircularGauge aoaGauge;
+        [SerializeField] private CircularGauge gForceGauge;
+
         [Header("Display Settings")]
         [SerializeField] private bool useMetric = true;
         [SerializeField] private int decimalPlaces = 0;
@@ -77,126 +87,178 @@ namespace GeoGame3D.UI
 
         private void UpdateSpeed()
         {
-            if (speedText == null) return;
-
             float speed = aircraft.Speed;
+            float displaySpeed = useMetric ? speed * 3.6f : speed * 2.237f; // km/h or mph
 
-            if (useMetric)
+            // Update visual gauge
+            if (speedGauge != null)
             {
-                // Convert m/s to km/h
-                float speedKmh = speed * 3.6f;
-                speedText.text = $"SPD: {speedKmh.ToString($"F{decimalPlaces}")} km/h";
+                speedGauge.SetValue(displaySpeed);
             }
-            else
+
+            // Update text display (fallback)
+            if (speedText != null)
             {
-                // Convert m/s to mph
-                float speedMph = speed * 2.237f;
-                speedText.text = $"SPD: {speedMph.ToString($"F{decimalPlaces}")} mph";
+                string unit = useMetric ? "km/h" : "mph";
+                speedText.text = $"SPD: {displaySpeed.ToString($"F{decimalPlaces}")} {unit}";
             }
         }
 
         private void UpdateAltitude()
         {
-            if (altitudeText == null) return;
-
             float altitude = aircraft.Altitude;
+            float displayAltitude = useMetric ? altitude : altitude * 3.281f; // m or feet
 
-            if (useMetric)
+            // Update visual gauge
+            if (altitudeGauge != null)
             {
-                altitudeText.text = $"ALT: {altitude.ToString($"F{decimalPlaces}")} m";
+                altitudeGauge.SetValue(displayAltitude);
             }
-            else
+
+            // Update text display (fallback)
+            if (altitudeText != null)
             {
-                // Convert m to feet
-                float altitudeFeet = altitude * 3.281f;
-                altitudeText.text = $"ALT: {altitudeFeet.ToString($"F{decimalPlaces}")} ft";
+                string unit = useMetric ? "m" : "ft";
+                altitudeText.text = $"ALT: {displayAltitude.ToString($"F{decimalPlaces}")} {unit}";
             }
         }
 
         private void UpdateHeading()
         {
-            if (headingText == null) return;
-
             float heading = aircraft.Heading;
-            headingText.text = $"HDG: {heading.ToString("000")}°";
+
+            // Update visual compass
+            if (headingCompass != null)
+            {
+                headingCompass.SetHeading(heading);
+            }
+
+            // Update text display (fallback)
+            if (headingText != null)
+            {
+                headingText.text = $"HDG: {heading.ToString("000")}°";
+            }
         }
 
         private void UpdateThrottle()
         {
-            if (throttleText == null) return;
-
             float throttle = aircraft.ThrottlePercent;
-            throttleText.text = $"THR: {throttle.ToString("F0")}%";
+
+            // Update visual gauge
+            if (throttleGauge != null)
+            {
+                throttleGauge.SetValue(throttle);
+            }
+
+            // Update text display (fallback)
+            if (throttleText != null)
+            {
+                throttleText.text = $"THR: {throttle.ToString("F0")}%";
+            }
         }
 
         private void UpdateAttitude()
         {
-            if (attitudeText == null) return;
-
             float pitch = aircraft.Pitch;
             float roll = aircraft.Roll;
-            attitudeText.text = $"ATT: P{pitch:+00;-00}° R{roll:+00;-00}°";
+
+            // Update artificial horizon
+            if (artificialHorizon != null)
+            {
+                artificialHorizon.UpdateHorizon(pitch, roll);
+            }
+
+            // Update text display (fallback)
+            if (attitudeText != null)
+            {
+                attitudeText.text = $"ATT: P{pitch:+00;-00}° R{roll:+00;-00}°";
+            }
         }
 
         private void UpdateVerticalSpeed()
         {
-            if (verticalSpeedText == null) return;
-
             float verticalSpeed = aircraft.VerticalSpeed;
 
-            if (useMetric)
+            // Update visual gauge
+            if (verticalSpeedGauge != null)
             {
-                verticalSpeedText.text = $"V/S: {verticalSpeed:+00.0;-00.0} m/s";
+                verticalSpeedGauge.SetValue(verticalSpeed);
             }
-            else
+
+            // Update text display (fallback)
+            if (verticalSpeedText != null)
             {
-                // Convert m/s to feet/minute
-                float feetPerMinute = verticalSpeed * 196.85f;
-                verticalSpeedText.text = $"V/S: {feetPerMinute:+0000;-0000} ft/min";
+                if (useMetric)
+                {
+                    verticalSpeedText.text = $"V/S: {verticalSpeed:+00.0;-00.0} m/s";
+                }
+                else
+                {
+                    float feetPerMinute = verticalSpeed * 196.85f;
+                    verticalSpeedText.text = $"V/S: {feetPerMinute:+0000;-0000} ft/min";
+                }
             }
         }
 
         private void UpdateAngleOfAttack()
         {
-            if (angleOfAttackText == null) return;
-
             float aoa = aircraft.AngleOfAttack;
-            angleOfAttackText.text = $"AOA: {aoa:+00.0;-00.0}°";
 
-            // Color code based on AOA (green = good, yellow = high, red = stall)
-            if (Mathf.Abs(aoa) > 15f)
+            // Update visual gauge
+            if (aoaGauge != null)
             {
-                angleOfAttackText.color = Color.red;
+                aoaGauge.SetValue(aoa);
             }
-            else if (Mathf.Abs(aoa) > 10f)
+
+            // Update text display (fallback)
+            if (angleOfAttackText != null)
             {
-                angleOfAttackText.color = Color.yellow;
-            }
-            else
-            {
-                angleOfAttackText.color = Color.green;
+                angleOfAttackText.text = $"AOA: {aoa:+00.0;-00.0}°";
+
+                // Color code based on AOA
+                if (Mathf.Abs(aoa) > 15f)
+                {
+                    angleOfAttackText.color = Color.red;
+                }
+                else if (Mathf.Abs(aoa) > 10f)
+                {
+                    angleOfAttackText.color = Color.yellow;
+                }
+                else
+                {
+                    angleOfAttackText.color = Color.green;
+                }
             }
         }
 
         private void UpdateGForce()
         {
-            if (gForceText == null) return;
-
             float gForce = aircraft.GForce;
-            gForceText.text = $"G: {gForce:F1}";
 
-            // Color code based on G-force (green = normal, yellow = moderate, red = high)
-            if (gForce > 4f || gForce < 0f)
+            // Update visual gauge
+            if (gForceGauge != null)
             {
-                gForceText.color = Color.red;
+                gForceGauge.SetValue(gForce);
             }
-            else if (gForce > 2.5f)
+
+            // Update text display (fallback)
+            if (gForceText != null)
             {
-                gForceText.color = Color.yellow;
-            }
-            else
-            {
-                gForceText.color = Color.green;
+                gForceText.text = $"G: {gForce:F1}";
+
+                // Color code based on G-force
+                if (gForce > 4f || gForce < 0f)
+                {
+                    gForceText.color = Color.red;
+                }
+                else if (gForce > 2.5f)
+                {
+                    gForceText.color = Color.yellow;
+                }
+                else
+                {
+                    gForceText.color = Color.green;
+                }
             }
         }
 
