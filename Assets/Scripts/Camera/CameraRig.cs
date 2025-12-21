@@ -11,13 +11,19 @@ namespace GeoGame3D.Camera
         [SerializeField] private Transform target;
 
         [Header("Follow Settings")]
-        [SerializeField] private Vector3 offset = new Vector3(0f, 5f, -15f);
+        [SerializeField] private Vector3 baseOffset = new Vector3(0f, 5f, -15f); // Offset at low speed
         [SerializeField] private float followSpeed = 8f;
         [SerializeField] private float rotationSpeed = 6f;
         [SerializeField] private float maxDeviationAngle = 30f; // Max degrees camera can deviate from aircraft axis
         [SerializeField] private float minDistance = 10f; // Minimum distance from aircraft
-        [SerializeField] private float centeringSpeed = 2f; // Speed at which camera returns to center when not turning
-        [SerializeField] private float centeringThreshold = 20f; // Angular velocity below which centering activates (deg/s)
+        [SerializeField] private float centeringSpeed = 4f; // Speed at which camera returns to center when not turning
+        [SerializeField] private float centeringThreshold = 10f; // Angular velocity below which centering activates (deg/s)
+
+        [Header("Dynamic Distance")]
+        [SerializeField] private bool enableDynamicDistance = true;
+        [SerializeField] private float minSpeedForDistance = 30f; // Speed below which distance doesn't change
+        [SerializeField] private float maxSpeedForDistance = 150f; // Speed at which max distance is reached
+        [SerializeField] private float distanceMultiplier = 1.5f; // How much to multiply distance at max speed
 
         [Header("Banking Effect")]
         [SerializeField] private bool enableBanking = true;
@@ -76,19 +82,41 @@ namespace GeoGame3D.Camera
 
         private void UpdatePosition()
         {
-            // Calculate ideal centered position behind aircraft's forward axis
-            Quaternion aircraftRotation = target.rotation;
-            Vector3 idealCenteredPosition = target.position + aircraftRotation * offset;
+            // Calculate dynamic offset based on speed
+            Vector3 currentOffset = baseOffset;
+            if (enableDynamicDistance && aircraft != null)
+            {
+                float speed = aircraft.Speed;
+                float speedFactor = Mathf.Clamp01((speed - minSpeedForDistance) / (maxSpeedForDistance - minSpeedForDistance));
+                float distanceScale = Mathf.Lerp(1f, distanceMultiplier, speedFactor);
+                currentOffset = baseOffset * distanceScale;
+            }
+
+            // Calculate ideal centered position using only forward direction (ignore roll)
+            // This ensures the camera is directly behind the aircraft, not offset by banking
+            Vector3 forward = target.forward;
+            Vector3 up = Vector3.up; // Use world up, not aircraft's up
+            Vector3 right = Vector3.Cross(up, forward).normalized;
+            up = Vector3.Cross(forward, right).normalized;
+
+            Quaternion levelRotation = Quaternion.LookRotation(forward, up);
+            Vector3 idealCenteredPosition = target.position + levelRotation * currentOffset;
 
             // Check if aircraft is turning (based on angular velocity)
             bool isTurning = targetRigidbody != null && targetRigidbody.angularVelocity.magnitude * Mathf.Rad2Deg > centeringThreshold;
 
-            // Smoothly move toward ideal position
-            Vector3 smoothedPosition = Vector3.Lerp(transform.position, idealCenteredPosition, followSpeed * Time.deltaTime);
+            // Start with current position
+            Vector3 smoothedPosition = transform.position;
 
-            // Auto-center when not turning: pull camera back to centerline
-            if (!isTurning)
+            // Smoothly move toward ideal centered position
+            if (isTurning)
             {
+                // When turning, use normal follow speed
+                smoothedPosition = Vector3.Lerp(smoothedPosition, idealCenteredPosition, followSpeed * Time.deltaTime);
+            }
+            else
+            {
+                // When not turning, use faster centering speed to return to axis
                 smoothedPosition = Vector3.Lerp(smoothedPosition, idealCenteredPosition, centeringSpeed * Time.deltaTime);
             }
 

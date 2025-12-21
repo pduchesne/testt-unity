@@ -1804,6 +1804,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   stallAngle: 15
+  stallLiftMultiplier: 0.5
   airDensity: 1.225
   angularDrag: 0.5
   gravity: 9.81
