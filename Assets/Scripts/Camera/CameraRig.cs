@@ -12,10 +12,9 @@ namespace GeoGame3D.Camera
 
         [Header("Follow Settings")]
         [SerializeField] private Vector3 offset = new Vector3(0f, 5f, -15f);
-        [SerializeField] private float followSpeed = 5f;
-        [SerializeField] private float rotationSpeed = 4f;
-        [SerializeField] private float maxAngularVelocity = 180f; // degrees/s
-        [SerializeField] private bool followVelocity = true; // Follow velocity vector instead of forward
+        [SerializeField] private float followSpeed = 8f;
+        [SerializeField] private float rotationSpeed = 6f;
+        [SerializeField] private float maxDeviationAngle = 30f; // Max degrees camera can deviate from aircraft axis
 
         [Header("Banking Effect")]
         [SerializeField] private bool enableBanking = true;
@@ -74,23 +73,35 @@ namespace GeoGame3D.Camera
 
         private void UpdatePosition()
         {
-            // Determine which direction to use for camera positioning and rotation
-            Vector3 lookDirection = GetLookDirection();
-            Quaternion referenceRotation = Quaternion.LookRotation(lookDirection);
+            // Calculate ideal position behind aircraft's forward axis
+            Quaternion aircraftRotation = target.rotation;
+            Vector3 idealPosition = target.position + aircraftRotation * offset;
 
-            // Calculate desired position based on reference rotation and offset
-            Vector3 desiredPosition = target.position + referenceRotation * offset;
+            // Smoothly move toward ideal position
+            Vector3 smoothedPosition = Vector3.Lerp(transform.position, idealPosition, followSpeed * Time.deltaTime);
 
-            // Smoothly move camera to desired position
-            transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
+            // Apply angular constraint: limit deviation from aircraft axis
+            Vector3 fromAircraft = smoothedPosition - target.position;
+            Vector3 aircraftBackward = -target.forward;
+
+            // Calculate angle between camera direction and aircraft backward axis
+            float currentAngle = Vector3.Angle(fromAircraft, aircraftBackward);
+
+            // If exceeding max angle, clamp to max angle
+            if (currentAngle > maxDeviationAngle)
+            {
+                // Project camera position onto a cone around the aircraft's backward axis
+                Vector3 constrainedDirection = Vector3.RotateTowards(aircraftBackward, fromAircraft.normalized, maxDeviationAngle * Mathf.Deg2Rad, 0f);
+                smoothedPosition = target.position + constrainedDirection * fromAircraft.magnitude;
+            }
+
+            transform.position = smoothedPosition;
         }
 
         private void UpdateRotation()
         {
-            // Get the direction we should be looking (velocity or forward)
-            Vector3 lookDirection = GetLookDirection();
-
-            // Camera should look forward in the direction of travel
+            // Always look at the aircraft
+            Vector3 lookDirection = target.position - transform.position;
             Quaternion desiredRotation = Quaternion.LookRotation(lookDirection);
 
             // Apply banking effect if enabled
@@ -105,28 +116,9 @@ namespace GeoGame3D.Camera
                 desiredRotation *= Quaternion.Euler(bankRotation);
             }
 
-            // Limit rotation speed to prevent camera spinning wildly
-            float maxRotation = maxAngularVelocity * Time.deltaTime;
-            Quaternion newRotation = Quaternion.RotateTowards(transform.rotation, desiredRotation, maxRotation);
-
-            // Apply smooth interpolation
-            transform.rotation = Quaternion.Slerp(transform.rotation, newRotation, rotationSpeed * Time.deltaTime);
+            // Smoothly rotate toward desired rotation
+            transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationSpeed * Time.deltaTime);
             lastRotation = transform.rotation;
-        }
-
-        private Vector3 GetLookDirection()
-        {
-            // Determine which direction to use for camera alignment
-            if (followVelocity && targetRigidbody != null && targetRigidbody.linearVelocity.sqrMagnitude > 1f)
-            {
-                // Use velocity direction (where the aircraft is actually moving)
-                return targetRigidbody.linearVelocity.normalized;
-            }
-            else
-            {
-                // Fall back to aircraft's forward direction at low speeds
-                return target.forward;
-            }
         }
 
         private void UpdateDynamicFOV()
