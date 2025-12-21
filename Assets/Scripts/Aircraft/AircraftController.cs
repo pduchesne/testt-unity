@@ -21,11 +21,12 @@ namespace GeoGame3D.Aircraft
         [SerializeField] private float minThrottle = 0.0f;
 
         [Header("Aerodynamics")]
-        [SerializeField] private float wingArea = 20f; // m²
+        [SerializeField] private float wingArea = 35f; // m²
         [SerializeField] private float baseDragCoefficient = 0.02f;
         [SerializeField] private float inducedDragFactor = 0.05f;
         [SerializeField] private AnimationCurve liftCurve = AnimationCurve.Linear(-15f, -0.5f, 15f, 1.5f);
-        [SerializeField] private float stallAngle = 15f; // degrees
+        [SerializeField] private float stallAngle = 20f; // degrees
+        [SerializeField] private float stallLiftMultiplier = 0.5f; // Lift multiplier when stalled
         [SerializeField] private float airDensity = 1.225f; // kg/m³ at sea level
 
         [Header("Physics")]
@@ -66,10 +67,12 @@ namespace GeoGame3D.Aircraft
             if (liftCurve == null || liftCurve.length == 0)
             {
                 liftCurve = new AnimationCurve();
-                liftCurve.AddKey(-15f, -0.8f);  // Negative lift when inverted
-                liftCurve.AddKey(0f, 0.3f);      // Some lift even at 0° AOA
-                liftCurve.AddKey(10f, 1.8f);     // Peak lift before stall
-                liftCurve.AddKey(15f, 1.2f);     // Reduced lift near stall angle
+                liftCurve.AddKey(-20f, -1.0f);   // Strong negative lift when inverted
+                liftCurve.AddKey(-10f, -0.5f);   // Moderate negative lift
+                liftCurve.AddKey(0f, 0.4f);      // Base lift at 0° AOA
+                liftCurve.AddKey(5f, 1.2f);      // Good lift at low AOA
+                liftCurve.AddKey(12f, 2.2f);     // Peak lift at optimal AOA
+                liftCurve.AddKey(20f, 1.5f);     // Reduced lift near stall angle
             }
         }
 
@@ -113,14 +116,19 @@ namespace GeoGame3D.Aircraft
             // 1. Thrust force
             Vector3 thrust = transform.forward * maxThrust * currentThrottle;
 
-            // 2. Lift force (perpendicular to velocity, in the "up" direction of the aircraft)
-            Vector3 liftDirection = Vector3.Cross(Vector3.Cross(rb.linearVelocity, transform.right), rb.linearVelocity).normalized;
+            // 2. Lift force (perpendicular to velocity and wing span)
+            // Lift acts perpendicular to both velocity and the aircraft's right axis (wing span)
+            // This gives us a vector pointing "up" relative to the wing
+            Vector3 velocityNormalized = rb.linearVelocity.normalized;
+            Vector3 liftDirection = Vector3.Cross(velocityNormalized, transform.right).normalized;
+
+            // Get lift coefficient from curve
             float liftCoefficient = liftCurve.Evaluate(angleOfAttack);
 
             // Apply stall penalty
             if (isStalled)
             {
-                liftCoefficient *= 0.3f; // Greatly reduced lift when stalled
+                liftCoefficient *= stallLiftMultiplier;
             }
 
             // Lift formula: L = 0.5 * ρ * v² * S * CL
@@ -128,7 +136,7 @@ namespace GeoGame3D.Aircraft
             Vector3 lift = liftDirection * liftForce;
 
             // 3. Drag force (opposite to velocity)
-            Vector3 dragDirection = -rb.linearVelocity.normalized;
+            Vector3 dragDirection = -velocityNormalized;
 
             // Total drag = base drag + induced drag (related to lift)
             float inducedDrag = inducedDragFactor * Mathf.Abs(liftCoefficient);
@@ -231,7 +239,7 @@ namespace GeoGame3D.Aircraft
                 Gizmos.DrawRay(pos, transform.forward * 50f);
 
                 // Draw lift direction (cyan)
-                Vector3 liftDir = Vector3.Cross(Vector3.Cross(rb.linearVelocity, transform.right), rb.linearVelocity).normalized;
+                Vector3 liftDir = Vector3.Cross(rb.linearVelocity.normalized, transform.right).normalized;
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawRay(pos, liftDir * 30f);
 

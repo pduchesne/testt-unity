@@ -1455,6 +1455,9 @@ MonoBehaviour:
   followSpeed: 5
   rotationSpeed: 3
   maxDeviationAngle: 30
+  minDistance: 10
+  centeringSpeed: 2
+  centeringThreshold: 20
   enableBanking: 1
   bankAmount: 0.3
   enableDynamicFOV: 1
