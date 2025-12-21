@@ -164,14 +164,25 @@ namespace GeoGame3D.Aircraft
         {
             // Raycast down to find altitude above terrain
             RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 10000f))
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 20000f))
             {
+                // Altitude is the distance from aircraft to ground
                 Altitude = hit.distance;
             }
             else
             {
-                // Fallback to absolute height if no terrain below
-                Altitude = transform.position.y;
+                // If no terrain hit, raycast up to find if we're below terrain
+                if (Physics.Raycast(transform.position, Vector3.up, out hit, 20000f))
+                {
+                    // We're below terrain - altitude is negative
+                    Altitude = -hit.distance;
+                }
+                else
+                {
+                    // No terrain in either direction - use absolute height
+                    // This handles edge cases where we're very far from any terrain
+                    Altitude = Mathf.Max(0f, transform.position.y);
+                }
             }
         }
 
