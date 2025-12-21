@@ -42,10 +42,12 @@ namespace GeoGame3D.Aircraft
         private Rigidbody rb;
         private float currentThrottle = 0.0f; // Start with engines off
         private float previousAltitude;
+        private Vector3 previousVelocity;
 
         // Aerodynamic state
         private float angleOfAttack;
         private bool isStalled;
+        private float gForce;
 
         // Public properties for HUD
         public float Speed => rb.linearVelocity.magnitude;
@@ -55,6 +57,9 @@ namespace GeoGame3D.Aircraft
         public float AngleOfAttack => angleOfAttack;
         public float VerticalSpeed { get; private set; }
         public bool IsStalled => isStalled;
+        public float GForce => gForce;
+        public float Pitch => NormalizePitch(transform.eulerAngles.x);
+        public float Roll => NormalizeRoll(transform.eulerAngles.z);
 
         private void Awake()
         {
@@ -91,6 +96,7 @@ namespace GeoGame3D.Aircraft
             // Set initial velocity
             rb.linearVelocity = transform.forward * 50f; // Start with some speed
             previousAltitude = transform.position.y;
+            previousVelocity = rb.linearVelocity;
         }
 
         private void FixedUpdate()
@@ -101,6 +107,7 @@ namespace GeoGame3D.Aircraft
             ApplyRotation();
             UpdateAltitude();
             UpdateVerticalSpeed();
+            UpdateGForce();
         }
 
         private void UpdateThrottle()
@@ -227,6 +234,39 @@ namespace GeoGame3D.Aircraft
             float currentAltitude = transform.position.y;
             VerticalSpeed = (currentAltitude - previousAltitude) / Time.fixedDeltaTime;
             previousAltitude = currentAltitude;
+        }
+
+        private void UpdateGForce()
+        {
+            // Calculate G-force: acceleration / gravity
+            // G-force = (current velocity - previous velocity) / (time * gravity)
+            Vector3 acceleration = (rb.linearVelocity - previousVelocity) / Time.fixedDeltaTime;
+
+            // Total G-force includes gravity (always adds 1G downward when stationary)
+            // We measure the magnitude of total acceleration
+            gForce = (acceleration.magnitude + gravity) / gravity;
+
+            previousVelocity = rb.linearVelocity;
+        }
+
+        /// <summary>
+        /// Normalize pitch angle from Euler angles (0-360) to -180 to 180 range
+        /// </summary>
+        private float NormalizePitch(float angle)
+        {
+            if (angle > 180f)
+                return angle - 360f;
+            return angle;
+        }
+
+        /// <summary>
+        /// Normalize roll angle from Euler angles (0-360) to -180 to 180 range
+        /// </summary>
+        private float NormalizeRoll(float angle)
+        {
+            if (angle > 180f)
+                return angle - 360f;
+            return angle;
         }
 
         #region Input System Callbacks
