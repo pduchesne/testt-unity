@@ -24,18 +24,20 @@ namespace GeoGame3D.Aircraft
 
             // Pitch and Roll from WASD or arrow keys
             Vector2 pitchRoll = Vector2.zero;
-            
+
             // Horizontal (Roll): A/D or Left/Right arrows
             if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
                 pitchRoll.x = -1f;
             else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
                 pitchRoll.x = 1f;
-            
+
             // Vertical (Pitch): W/S or Up/Down arrows
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
-                pitchRoll.y = 1f;
-            else if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
-                pitchRoll.y = -1f;
+            // Flight sim convention: S/Down = pull back = pitch UP
+            //                        W/Up = push forward = pitch DOWN
+            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+                pitchRoll.y = 1f;  // Pull back = pitch up
+            else if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+                pitchRoll.y = -1f; // Push forward = pitch down
             
             SendPitchRoll(pitchRoll);
             

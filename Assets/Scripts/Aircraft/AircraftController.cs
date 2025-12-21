@@ -12,9 +12,9 @@ namespace GeoGame3D.Aircraft
     {
         [Header("Engine & Thrust")]
         [SerializeField] private float maxThrust = 50000f; // Newtons
-        [SerializeField] private float pitchSpeed = 45f; // degrees/s
-        [SerializeField] private float rollSpeed = 90f; // degrees/s
-        [SerializeField] private float yawSpeed = 30f; // degrees/s
+        [SerializeField] private float pitchSpeed = 80f; // degrees/s
+        [SerializeField] private float rollSpeed = 120f; // degrees/s
+        [SerializeField] private float yawSpeed = 40f; // degrees/s
 
         [Header("Control Settings")]
         [SerializeField] private float throttleChangeSpeed = 0.5f;
@@ -66,9 +66,10 @@ namespace GeoGame3D.Aircraft
             if (liftCurve == null || liftCurve.length == 0)
             {
                 liftCurve = new AnimationCurve();
-                liftCurve.AddKey(-15f, -0.5f);
-                liftCurve.AddKey(0f, 0f);
-                liftCurve.AddKey(15f, 1.5f);
+                liftCurve.AddKey(-15f, -0.8f);  // Negative lift when inverted
+                liftCurve.AddKey(0f, 0.3f);      // Some lift even at 0° AOA
+                liftCurve.AddKey(10f, 1.8f);     // Peak lift before stall
+                liftCurve.AddKey(15f, 1.2f);     // Reduced lift near stall angle
             }
         }
 
