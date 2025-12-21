@@ -66,7 +66,12 @@ namespace GeoGame3D.Aircraft
             // Force throttle settings to correct values
             minThrottle = 0.0f;
             currentThrottle = 0.0f;
-            Debug.Log($"Aircraft initialized: minThrottle={minThrottle}, currentThrottle={currentThrottle}");
+
+            // Force aerodynamic coefficients to correct values (override any Inspector settings)
+            baseDragCoefficient = 0.25f;
+            inducedDragFactor = 0.12f;
+
+            Debug.Log($"Aircraft initialized: minThrottle={minThrottle}, currentThrottle={currentThrottle}, baseDrag={baseDragCoefficient}, inducedDrag={inducedDragFactor}");
 
             // Initialize lift curve if not set
             if (liftCurve == null || liftCurve.length == 0)
