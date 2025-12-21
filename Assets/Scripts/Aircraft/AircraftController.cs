@@ -40,7 +40,7 @@ namespace GeoGame3D.Aircraft
 
         // State
         private Rigidbody rb;
-        private float currentThrottle = 0.5f;
+        private float currentThrottle = 0.0f; // Start with engines off
         private float previousAltitude;
 
         // Aerodynamic state
@@ -62,6 +62,11 @@ namespace GeoGame3D.Aircraft
             rb.useGravity = false; // We'll handle our own physics
             rb.linearDamping = 0f; // Drag is calculated in aerodynamics
             rb.angularDamping = angularDrag;
+
+            // Force throttle settings to correct values
+            minThrottle = 0.0f;
+            currentThrottle = 0.0f;
+            Debug.Log($"Aircraft initialized: minThrottle={minThrottle}, currentThrottle={currentThrottle}");
 
             // Initialize lift curve if not set
             if (liftCurve == null || liftCurve.length == 0)
@@ -95,7 +100,14 @@ namespace GeoGame3D.Aircraft
 
         private void UpdateThrottle()
         {
+            float previousThrottle = currentThrottle;
             currentThrottle = Mathf.Clamp(currentThrottle + throttleInput * throttleChangeSpeed * Time.fixedDeltaTime, minThrottle, 1f);
+
+            // Debug logging to track throttle changes
+            if (Time.frameCount % 120 == 0 || Mathf.Abs(currentThrottle - previousThrottle) > 0.01f)
+            {
+                Debug.Log($"Throttle: {currentThrottle:F2} ({currentThrottle*100:F0}%) | Input: {throttleInput:F1} | Min: {minThrottle} | Thrust: {(maxThrust * currentThrottle):F0}N");
+            }
         }
 
         private void CalculateAerodynamics()
@@ -151,6 +163,12 @@ namespace GeoGame3D.Aircraft
 
             // 4. Gravity
             Vector3 gravityForce = Vector3.down * (rb.mass * gravity);
+
+            // Debug logging for forces
+            if (Time.frameCount % 120 == 0)
+            {
+                Debug.Log($"Speed: {speed:F1} m/s ({speed*3.6f:F0} km/h) | Drag: {dragForce:F0}N | Thrust: {thrust.magnitude:F0}N | CD: {totalDragCoefficient:F3}");
+            }
 
             // Apply all forces
             rb.AddForce(thrust + lift + drag + gravityForce);
