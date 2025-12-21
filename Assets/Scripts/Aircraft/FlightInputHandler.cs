@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace GeoGame3D.Aircraft
 {
     /// <summary>
-    /// Handles flight input using Unity's Input Manager (legacy input system)
-    /// This is a temporary solution until the new Input System is properly configured
+    /// Handles flight input using the new Input System's Keyboard class
+    /// Directly reads keyboard state and sets input values on AircraftController
     /// </summary>
     [RequireComponent(typeof(AircraftController))]
     public class FlightInputHandler : MonoBehaviour
@@ -18,30 +19,36 @@ namespace GeoGame3D.Aircraft
 
         private void Update()
         {
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return;
+
             // Pitch and Roll from WASD or arrow keys
-            Vector2 pitchRoll = new Vector2(
-                Input.GetAxis("Horizontal"),  // A/D for roll (left/right)
-                Input.GetAxis("Vertical")     // W/S for pitch (up/down)
-            );
+            Vector2 pitchRoll = Vector2.zero;
             
-            // Simulate Input Action callback
-            var pitchRollContext = new UnityEngine.InputSystem.InputAction.CallbackContext();
-            controller.OnPitchRoll(pitchRollContext);
+            // Horizontal (Roll): A/D or Left/Right arrows
+            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
+                pitchRoll.x = -1f;
+            else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
+                pitchRoll.x = 1f;
             
-            // Manually set the pitch/roll values using reflection since we can't properly create CallbackContext
-            // Instead, let's directly access the private fields
+            // Vertical (Pitch): W/S or Up/Down arrows
+            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+                pitchRoll.y = 1f;
+            else if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+                pitchRoll.y = -1f;
+            
             SendPitchRoll(pitchRoll);
             
             // Yaw from Q/E keys
             float yaw = 0f;
-            if (Input.GetKey(KeyCode.Q)) yaw = -1f;
-            if (Input.GetKey(KeyCode.E)) yaw = 1f;
+            if (keyboard.qKey.isPressed) yaw = -1f;
+            if (keyboard.eKey.isPressed) yaw = 1f;
             SendYaw(yaw);
             
             // Throttle from Shift/Ctrl
             float throttle = 0f;
-            if (Input.GetKey(KeyCode.LeftShift)) throttle = 1f;
-            if (Input.GetKey(KeyCode.LeftControl)) throttle = -1f;
+            if (keyboard.leftShiftKey.isPressed) throttle = 1f;
+            if (keyboard.leftCtrlKey.isPressed) throttle = -1f;
             SendThrottle(throttle);
         }
         
