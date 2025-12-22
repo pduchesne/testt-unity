@@ -35,6 +35,10 @@ namespace GeoGame3D.UI
         private float lastUpdateTime;
         private Coroutine fetchCoroutine;
 
+        // Current aircraft position in tile coordinates (for precise positioning)
+        private double currentLongitude;
+        private double currentLatitude;
+
         private void Start()
         {
             if (georeference == null)
@@ -113,6 +117,10 @@ namespace GeoGame3D.UI
             double latitude = lla.y;
             // double height = lla.z; // Not needed for minimap
 
+            // Store current position for icon positioning
+            currentLongitude = longitude;
+            currentLatitude = latitude;
+
             // Convert lat/lon to tile coordinates
             int tileX = LonToTileX(longitude, zoomLevel);
             int tileY = LatToTileY(latitude, zoomLevel);
@@ -141,8 +149,26 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Keep aircraft icon centered
-            aircraftIcon.anchoredPosition = Vector2.zero;
+            // Calculate aircraft's pixel position within the current tile
+            // Get tile bounds
+            double tileMinLon = TileXToLon(currentTileX, zoomLevel);
+            double tileMaxLon = TileXToLon(currentTileX + 1, zoomLevel);
+            double tileMaxLat = TileYToLat(currentTileY, zoomLevel);  // Y increases downward in tile coords
+            double tileMinLat = TileYToLat(currentTileY + 1, zoomLevel);
+
+            // Calculate fractional position within tile (0-1)
+            double fracX = (currentLongitude - tileMinLon) / (tileMaxLon - tileMinLon);
+            double fracY = (currentLatitude - tileMinLat) / (tileMaxLat - tileMinLat);
+
+            // Convert to pixel coordinates within the map image
+            // Note: Y is inverted (tile Y increases downward, but Unity UI Y increases upward)
+            float mapWidth = mapImage.rectTransform.rect.width;
+            float mapHeight = mapImage.rectTransform.rect.height;
+
+            float pixelX = (float)(fracX * mapWidth) - mapWidth / 2f;  // Offset by half to center on (0,0)
+            float pixelY = (float)((1.0 - fracY) * mapHeight) - mapHeight / 2f;  // Invert Y and offset
+
+            aircraftIcon.anchoredPosition = new Vector2(pixelX, pixelY);
 
             // Update rotation
             if (rotateWithAircraft)
