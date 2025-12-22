@@ -21,6 +21,7 @@ namespace GeoGame3D.UI
         [Header("Map Settings")]
         [SerializeField] private int zoomLevel = 15; // OSM zoom level (higher = more detail)
         [SerializeField] private int tileSize = 256; // OSM tile size in pixels
+        [SerializeField] private int tileGridSize = 3; // Load 3x3 grid of tiles (9 tiles total)
         [SerializeField] private float updateInterval = 1.0f; // Update map every N seconds
         [SerializeField] private string tileServerUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
@@ -30,10 +31,10 @@ namespace GeoGame3D.UI
         [SerializeField] private Color aircraftIconColor = Color.red;
 
         private Texture2D mapTexture;
-        private int currentTileX;
-        private int currentTileY;
+        private int currentCenterTileX;
+        private int currentCenterTileY;
         private float lastUpdateTime;
-        private Coroutine fetchCoroutine;
+        private bool isFetchingTiles = false;
 
         // Current aircraft position in tile coordinates (for precise positioning)
         private double currentLongitude;
@@ -61,8 +62,9 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Initialize map texture
-            mapTexture = new Texture2D(tileSize, tileSize, TextureFormat.RGB24, false);
+            // Initialize map texture for 3x3 tile grid
+            int textureSize = tileSize * tileGridSize;
+            mapTexture = new Texture2D(textureSize, textureSize, TextureFormat.RGB24, false);
             mapTexture.filterMode = FilterMode.Bilinear;
             mapImage.texture = mapTexture;
 
@@ -101,7 +103,6 @@ namespace GeoGame3D.UI
             }
 
             // Convert Unity world position to geospatial coordinates
-            // Use Cesium's coordinate transformation to get actual lat/lon as aircraft moves
             Vector3 unityPos = aircraftTransform.position;
             Unity.Mathematics.double3 unityPosDouble = new Unity.Mathematics.double3(unityPos.x, unityPos.y, unityPos.z);
 
@@ -115,30 +116,26 @@ namespace GeoGame3D.UI
 
             double longitude = lla.x;
             double latitude = lla.y;
-            // double height = lla.z; // Not needed for minimap
 
-            // Store current position for icon positioning
+            // Store current position for map positioning
             currentLongitude = longitude;
             currentLatitude = latitude;
 
-            // Convert lat/lon to tile coordinates
-            int tileX = LonToTileX(longitude, zoomLevel);
-            int tileY = LatToTileY(latitude, zoomLevel);
+            // Convert lat/lon to tile coordinates (center tile)
+            int centerTileX = LonToTileX(longitude, zoomLevel);
+            int centerTileY = LatToTileY(latitude, zoomLevel);
 
-            // Check if we need to fetch a new tile
-            if (forceUpdate || tileX != currentTileX || tileY != currentTileY)
+            // Check if we need to fetch new tiles (center tile changed)
+            if (forceUpdate || centerTileX != currentCenterTileX || centerTileY != currentCenterTileY)
             {
-                currentTileX = tileX;
-                currentTileY = tileY;
+                currentCenterTileX = centerTileX;
+                currentCenterTileY = centerTileY;
 
-                // Stop any existing fetch
-                if (fetchCoroutine != null)
+                // Fetch 3x3 grid of tiles
+                if (!isFetchingTiles)
                 {
-                    StopCoroutine(fetchCoroutine);
+                    StartCoroutine(FetchTileGrid(centerTileX, centerTileY, zoomLevel));
                 }
-
-                // Fetch new tile
-                fetchCoroutine = StartCoroutine(FetchOSMTile(tileX, tileY, zoomLevel));
             }
         }
 
@@ -149,43 +146,76 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Calculate aircraft's pixel position within the current tile
-            // Get tile bounds
-            double tileMinLon = TileXToLon(currentTileX, zoomLevel);
-            double tileMaxLon = TileXToLon(currentTileX + 1, zoomLevel);
-            double tileMaxLat = TileYToLat(currentTileY, zoomLevel);  // Y increases downward in tile coords
-            double tileMinLat = TileYToLat(currentTileY + 1, zoomLevel);
+            // ALWAYS keep aircraft icon centered and pointing upward
+            aircraftIcon.anchoredPosition = Vector2.zero;
+            aircraftIcon.localRotation = Quaternion.identity; // Point upward (no rotation)
 
-            // Calculate fractional position within tile (0-1)
-            double fracX = (currentLongitude - tileMinLon) / (tileMaxLon - tileMinLon);
-            double fracY = (currentLatitude - tileMinLat) / (tileMaxLat - tileMinLat);
+            // Calculate aircraft's position within the 3x3 tile grid
+            // The center tile is at grid position (1, 1), surrounded by 8 tiles
+            int gridOffset = tileGridSize / 2; // For 3x3, this is 1
 
-            // Convert to pixel coordinates within the map image
-            // Note: Y is inverted (tile Y increases downward, but Unity UI Y increases upward)
-            float mapWidth = mapImage.rectTransform.rect.width;
-            float mapHeight = mapImage.rectTransform.rect.height;
+            // Get bounds of the center tile
+            double centerTileMinLon = TileXToLon(currentCenterTileX, zoomLevel);
+            double centerTileMaxLon = TileXToLon(currentCenterTileX + 1, zoomLevel);
+            double centerTileMaxLat = TileYToLat(currentCenterTileY, zoomLevel);
+            double centerTileMinLat = TileYToLat(currentCenterTileY + 1, zoomLevel);
 
-            float pixelX = (float)(fracX * mapWidth) - mapWidth / 2f;  // Offset by half to center on (0,0)
-            float pixelY = (float)((1.0 - fracY) * mapHeight) - mapHeight / 2f;  // Invert Y and offset
+            // Calculate fractional position within center tile (0-1)
+            double fracX = (currentLongitude - centerTileMinLon) / (centerTileMaxLon - centerTileMinLon);
+            double fracY = (currentLatitude - centerTileMinLat) / (centerTileMaxLat - centerTileMinLat);
 
-            aircraftIcon.anchoredPosition = new Vector2(pixelX, pixelY);
+            // Convert to pixel offset within the 3x3 grid texture
+            // Center tile starts at (tileSize, tileSize) in the 3x3 grid
+            float textureSize = tileSize * tileGridSize;
+            float centerTileStartX = tileSize * gridOffset;
+            float centerTileStartY = tileSize * gridOffset;
 
-            // Update rotation
+            // Calculate pixel position in the full 3x3 texture
+            float pixelX = centerTileStartX + (float)(fracX * tileSize);
+            float pixelY = centerTileStartY + (float)((1.0 - fracY) * tileSize); // Invert Y
+
+            // Calculate offset to center aircraft in the view
+            // We want to translate the map so the aircraft's position appears at the center
+            float offsetX = textureSize / 2f - pixelX;
+            float offsetY = textureSize / 2f - pixelY;
+
+            // Apply translation to map (moves map so aircraft position is centered)
+            mapImage.rectTransform.anchoredPosition = new Vector2(offsetX, offsetY);
+
+            // Apply rotation to map based on aircraft heading
             if (rotateWithAircraft)
             {
-                // Rotate the entire map to keep north up relative to aircraft
                 float heading = aircraftTransform.eulerAngles.y;
                 mapImage.rectTransform.localRotation = Quaternion.Euler(0, 0, -heading);
             }
             else
             {
-                // Keep map north-up, rotate only the aircraft icon
-                float heading = aircraftTransform.eulerAngles.y;
-                aircraftIcon.localRotation = Quaternion.Euler(0, 0, -heading);
+                mapImage.rectTransform.localRotation = Quaternion.identity;
             }
         }
 
-        private IEnumerator FetchOSMTile(int x, int y, int zoom)
+        private IEnumerator FetchTileGrid(int centerX, int centerY, int zoom)
+        {
+            isFetchingTiles = true;
+            int gridOffset = tileGridSize / 2;
+
+            // Fetch 3x3 grid of tiles
+            for (int dy = -gridOffset; dy <= gridOffset; dy++)
+            {
+                for (int dx = -gridOffset; dx <= gridOffset; dx++)
+                {
+                    int tileX = centerX + dx;
+                    int tileY = centerY + dy;
+
+                    // Fetch individual tile
+                    yield return FetchSingleTile(tileX, tileY, zoom, dx + gridOffset, dy + gridOffset);
+                }
+            }
+
+            isFetchingTiles = false;
+        }
+
+        private IEnumerator FetchSingleTile(int x, int y, int zoom, int gridX, int gridY)
         {
             // Construct tile URL
             string url = tileServerUrl
@@ -201,13 +231,29 @@ namespace GeoGame3D.UI
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                // Get the downloaded texture
                 Texture2D downloadedTexture = DownloadHandlerTexture.GetContent(request);
 
-                // Copy pixels to our map texture (avoid mipmap issues)
-                if (downloadedTexture.width == mapTexture.width && downloadedTexture.height == mapTexture.height)
+                // Copy pixels to the correct position in the 3x3 grid texture
+                if (downloadedTexture.width == tileSize && downloadedTexture.height == tileSize)
                 {
-                    mapTexture.SetPixels(downloadedTexture.GetPixels());
+                    Color[] pixels = downloadedTexture.GetPixels();
+
+                    // Calculate position in the grid texture
+                    int startX = gridX * tileSize;
+                    int startY = gridY * tileSize;
+
+                    // Copy pixels to the grid position
+                    for (int py = 0; py < tileSize; py++)
+                    {
+                        for (int px = 0; px < tileSize; px++)
+                        {
+                            int srcIndex = py * tileSize + px;
+                            int dstX = startX + px;
+                            int dstY = startY + py;
+                            mapTexture.SetPixel(dstX, dstY, pixels[srcIndex]);
+                        }
+                    }
+
                     mapTexture.Apply();
                 }
                 else
@@ -223,7 +269,6 @@ namespace GeoGame3D.UI
             }
 
             request.Dispose();
-            fetchCoroutine = null;
         }
 
         #region Tile Coordinate Conversion
