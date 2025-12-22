@@ -102,8 +102,11 @@ namespace GeoGame3D.UI
 
             // Convert Unity world position to geospatial coordinates
             // Use Cesium's coordinate transformation to get actual lat/lon as aircraft moves
+            Vector3 unityPos = aircraftTransform.position;
+            Unity.Mathematics.double3 unityPosDouble = new Unity.Mathematics.double3(unityPos.x, unityPos.y, unityPos.z);
+
             Unity.Mathematics.double3 ecefPosition = georeference.TransformUnityPositionToEarthCenteredEarthFixed(
-                aircraftTransform.position
+                unityPosDouble
             );
 
             Unity.Mathematics.double3 lla = CesiumForUnity.CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(
