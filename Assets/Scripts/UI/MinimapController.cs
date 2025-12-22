@@ -82,15 +82,11 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Update aircraft icon rotation
+            // Update aircraft icon rotation every frame
             UpdateAircraftIcon();
 
-            // Periodically update the map
-            if (Time.time - lastUpdateTime >= updateInterval)
-            {
-                UpdateMap(false);
-                lastUpdateTime = Time.time;
-            }
+            // Update map every frame (only fetches new tile when crossing boundaries)
+            UpdateMap(false);
         }
 
         private void UpdateMap(bool forceUpdate)

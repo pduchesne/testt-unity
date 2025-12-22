@@ -327,6 +327,30 @@
         "Automatic aircraft positioning system",
         "Utrecht 3D tileset integration"
       ]
+    },
+    {
+      "id": "IMPL-017",
+      "title": "Add minimap with OpenStreetMap basemap",
+      "description": "Implement a dynamic minimap overlay showing the aircraft's real-time position and heading on an OpenStreetMap basemap. The minimap should update live as the aircraft moves, automatically fetching OSM tiles based on location, and display the aircraft position with a directional indicator.",
+      "implements": [
+        "REQ-F008"
+      ],
+      "component": "UI System",
+      "priority": "medium",
+      "status": "completed",
+      "progress": 100,
+      "dependencies": [
+        "IMPL-016"
+      ],
+      "deliverables": [
+        "MinimapController.cs script",
+        "OSM tile fetching system",
+        "Real-time coordinate transformation (Unity → ECEF → LLA)",
+        "Aircraft position and heading indicator",
+        "Minimap UI canvas element",
+        "Live update system (every frame)",
+        "Tile boundary detection and auto-fetch"
+      ]
     }
   ],
   "milestones": [
