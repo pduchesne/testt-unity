@@ -111,6 +111,13 @@ namespace GeoGame3D.UI
             double latitude = pos.y;
             double longitude = pos.x;
 
+            // If anchor shows 0,0,0 (at georeference origin), use georeference coordinates
+            if (latitude == 0.0 && longitude == 0.0)
+            {
+                latitude = georeference.latitude;
+                longitude = georeference.longitude;
+            }
+
             // Convert lat/lon to tile coordinates
             int tileX = LonToTileX(longitude, zoomLevel);
             int tileY = LatToTileY(latitude, zoomLevel);
