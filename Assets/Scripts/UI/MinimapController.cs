@@ -100,23 +100,19 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Get aircraft position in lat/lon
-            var anchor = aircraftTransform.GetComponent<CesiumGlobeAnchor>();
-            if (anchor == null)
-            {
-                return;
-            }
+            // Convert Unity world position to geospatial coordinates
+            // Use Cesium's coordinate transformation to get actual lat/lon as aircraft moves
+            Unity.Mathematics.double3 ecefPosition = georeference.TransformUnityPositionToEarthCenteredEarthFixed(
+                aircraftTransform.position
+            );
 
-            var pos = anchor.longitudeLatitudeHeight;
-            double latitude = pos.y;
-            double longitude = pos.x;
+            Unity.Mathematics.double3 lla = CesiumForUnity.CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(
+                ecefPosition
+            );
 
-            // If anchor shows 0,0,0 (at georeference origin), use georeference coordinates
-            if (latitude == 0.0 && longitude == 0.0)
-            {
-                latitude = georeference.latitude;
-                longitude = georeference.longitude;
-            }
+            double longitude = lla.x;
+            double latitude = lla.y;
+            // double height = lla.z; // Not needed for minimap
 
             // Convert lat/lon to tile coordinates
             int tileX = LonToTileX(longitude, zoomLevel);
