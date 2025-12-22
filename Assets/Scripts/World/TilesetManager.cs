@@ -195,6 +195,15 @@ namespace GeoGame3D.World
 
             TilesetConfig config = tilesets[index];
 
+            // Update CesiumGeoreference origin to center the world at this location
+            if (georeference != null)
+            {
+                georeference.latitude = config.latitude;
+                georeference.longitude = config.longitude;
+                georeference.height = config.height;
+                Debug.Log($"TilesetManager: Set georeference origin to {config.latitude}, {config.longitude}, {config.height}m");
+            }
+
             // Use CesiumGlobeAnchor to position aircraft
             CesiumGlobeAnchor anchor = aircraftTransform.GetComponent<CesiumGlobeAnchor>();
             if (anchor == null)
@@ -202,7 +211,7 @@ namespace GeoGame3D.World
                 anchor = aircraftTransform.gameObject.AddComponent<CesiumGlobeAnchor>();
             }
 
-            // Set position
+            // Set position (same as georeference origin for aircraft to start at world center)
             anchor.longitudeLatitudeHeight = new Unity.Mathematics.double3(
                 config.longitude,
                 config.latitude,
