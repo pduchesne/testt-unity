@@ -149,21 +149,19 @@ namespace GeoGame3D.UI
             // Aircraft icon is always centered on the MapDisplay
             aircraftIcon.anchoredPosition = Vector2.zero;
 
+            // Icon always rotates to show aircraft heading
+            aircraftIcon.localRotation = Quaternion.Euler(0, 0, -heading);
+
             if (rotateWithAircraft)
             {
                 // Rotate map so aircraft heading is "up"
+                // Both map and icon rotate together, so icon appears to point "up"
                 minimapContainer.localRotation = Quaternion.Euler(0, 0, -heading);
-
-                // Icon doesn't rotate - it always points up (which is the aircraft's heading)
-                aircraftIcon.localRotation = Quaternion.identity;
             }
             else
             {
-                // Map stays north-up
+                // Map stays north-up, only icon rotates
                 minimapContainer.localRotation = Quaternion.identity;
-
-                // Icon rotates to show aircraft heading
-                aircraftIcon.localRotation = Quaternion.Euler(0, 0, -heading);
             }
         }
 
