@@ -2,7 +2,7 @@ Use the project-graph MCP to track and update the project status (tasks, usecase
 Use the process-runner MCP to start, debug and kill test processes.
 Use playwright MCP to test UIs.
 Use Unity-MCP to manage and monitor the Unity project, but edit code as much as possible by directly editing files.
-When using Unity-MCP:GameObject_Find , use 'briefData=true' to avoid crashing the Editor.
+IMPORTANT: When using Find GameObject (Unity-MCP:GameObject_Find) , ALWAYS use 'briefData=true' to avoid crashing the Editor.
 
 When starting, check the project status and list the likely next tasks.
 

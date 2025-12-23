@@ -331,7 +331,7 @@
     {
       "id": "IMPL-017",
       "title": "Add minimap with OpenStreetMap basemap",
-      "description": "Implement a dynamic minimap overlay showing the aircraft's real-time position and heading on an OpenStreetMap basemap. The minimap should update live as the aircraft moves, automatically fetching OSM tiles based on location, and display the aircraft position with a directional indicator.",
+      "description": "Successfully implemented a dynamic minimap overlay showing the aircraft's real-time position and heading on an OpenStreetMap basemap. Features:\n- OSMMapDisplay component: Reusable, north-oriented OSM tile renderer with (mapCenter, zoomLevel, pixelSize) parameters\n- MinimapController: HUD integration with rotation, RectMask2D clipping, and centered aircraft icon\n- Proper hierarchy: Minimap -> MapDisplay (OSMMapDisplay+RawImage) -> MinimapContainer (RectMask2D) -> AircraftIcon\n- Live updates: Aircraft position converted from Unity -> ECEF -> LLA coordinates every frame\n- Map rotation: Container rotates based on aircraft heading while aircraft icon stays upward\n- Tile fetching: 3x3 tile grid with smart boundary detection and auto-fetch\n- All references properly wired up and tested in play mode",
       "implements": [
         "REQ-F008"
       ],
