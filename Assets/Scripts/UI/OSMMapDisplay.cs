@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
+using GeoGame3D.Utils;
 
 namespace GeoGame3D.UI
 {
@@ -39,6 +40,8 @@ namespace GeoGame3D.UI
         /// <param name="size">Display size in pixels (width and height)</param>
         public void UpdateMap(double latitude, double longitude, int zoom, int size)
         {
+            SimpleLogger.Debug("Minimap", $"UpdateMap called: lat={latitude:F4}, lon={longitude:F4}, zoom={zoom}, size={size}");
+
             // Update parameters
             centerLatitude = latitude;
             centerLongitude = longitude;
@@ -48,9 +51,13 @@ namespace GeoGame3D.UI
             // Calculate how many tiles we need to cover the display size
             // Add 2 extra tiles (1 on each side) to allow for panning
             tileGridSize = Mathf.CeilToInt(pixelSize / (float)tileSize) + 2;
+            int gridOffset = tileGridSize / 2;
+            int actualGridSize = 2 * gridOffset + 1;
+            int expectedTextureSize = tileSize * actualGridSize;
+            SimpleLogger.Debug("Minimap", $"Tile grid: tileGridSize={tileGridSize}, actualGridSize={actualGridSize}, expectedTextureSize={expectedTextureSize}");
 
             // Initialize texture if needed or resize if size changed
-            if (!initialized || mapTexture == null || mapTexture.width != tileGridSize * tileSize)
+            if (!initialized || mapTexture == null || mapTexture.width != expectedTextureSize)
             {
                 InitializeTexture();
             }
@@ -59,16 +66,28 @@ namespace GeoGame3D.UI
             int centerTileX = LonToTileX(centerLongitude, zoomLevel);
             int centerTileY = LatToTileY(centerLatitude, zoomLevel);
 
+            SimpleLogger.Debug("Minimap", $"Tile check: initialized={initialized}, centerTile=({centerTileX},{centerTileY}), current=({currentCenterTileX},{currentCenterTileY}), isFetching={isFetchingTiles}");
+
             // Fetch tiles if center tile changed
             if (!initialized || centerTileX != currentCenterTileX || centerTileY != currentCenterTileY)
             {
+                SimpleLogger.Info("Minimap", $"Center tile changed to ({centerTileX},{centerTileY}), fetching new tile grid");
                 currentCenterTileX = centerTileX;
                 currentCenterTileY = centerTileY;
 
                 if (!isFetchingTiles)
                 {
+                    SimpleLogger.Debug("Minimap", "Starting FetchTileGrid coroutine");
                     StartCoroutine(FetchTileGrid(centerTileX, centerTileY, zoomLevel));
                 }
+                else
+                {
+                    SimpleLogger.Debug("Minimap", "Already fetching tiles, skipping");
+                }
+            }
+            else
+            {
+                SimpleLogger.Debug("Minimap", "Tiles already loaded for current position");
             }
 
             // Update UV offset to center the map on the exact coordinate
@@ -81,7 +100,7 @@ namespace GeoGame3D.UI
         {
             if (mapImage == null)
             {
-                Debug.LogError("OSMMapDisplay: Map image not assigned!");
+                SimpleLogger.Error("Minimap", "Map image not assigned!");
                 return;
             }
 
@@ -90,6 +109,8 @@ namespace GeoGame3D.UI
             int gridOffset = tileGridSize / 2;
             int actualGridSize = 2 * gridOffset + 1;
             int textureSize = tileSize * actualGridSize;
+
+            SimpleLogger.Info("Minimap", $"Initializing texture: gridOffset={gridOffset}, actualGridSize={actualGridSize}, textureSize={textureSize}px");
 
             if (mapTexture != null)
             {
@@ -117,6 +138,7 @@ namespace GeoGame3D.UI
 
             // Calculate the exact pixel position of the center point within the tile grid
             int gridOffset = tileGridSize / 2;
+            int actualGridSize = 2 * gridOffset + 1;
 
             // Get bounds of the center tile
             double centerTileMinLon = TileXToLon(currentCenterTileX, zoomLevel);
@@ -129,7 +151,7 @@ namespace GeoGame3D.UI
             double fracY = (centerLatitude - centerTileMinLat) / (centerTileMaxLat - centerTileMinLat);
 
             // Convert to pixel position in the texture
-            int textureSize = tileSize * tileGridSize;
+            int textureSize = tileSize * actualGridSize;
             float centerTileStartX = tileSize * gridOffset;
             float centerTileStartY = tileSize * gridOffset;
 
@@ -157,6 +179,7 @@ namespace GeoGame3D.UI
 
         private IEnumerator FetchTileGrid(int centerX, int centerY, int zoom)
         {
+            SimpleLogger.Info("Minimap", $"Fetching tile grid: center=({centerX},{centerY}), zoom={zoom}, gridOffset={tileGridSize / 2}");
             isFetchingTiles = true;
             int gridOffset = tileGridSize / 2;
 
@@ -227,14 +250,14 @@ namespace GeoGame3D.UI
                 }
                 else
                 {
-                    Debug.LogWarning($"OSMMapDisplay: Tile size mismatch. Expected {tileSize}x{tileSize}, got {downloadedTexture.width}x{downloadedTexture.height}");
+                    SimpleLogger.Warning("Minimap", $"Tile size mismatch for {x}/{y}/{zoom}: expected {tileSize}x{tileSize}, got {downloadedTexture.width}x{downloadedTexture.height}");
                 }
 
                 Destroy(downloadedTexture);
             }
             else
             {
-                Debug.LogWarning($"OSMMapDisplay: Failed to fetch tile {x}/{y}/{zoom}: {request.error}");
+                SimpleLogger.Warning("Minimap", $"Failed to fetch tile {x}/{y}/{zoom}: {request.error}");
             }
 
             request.Dispose();
