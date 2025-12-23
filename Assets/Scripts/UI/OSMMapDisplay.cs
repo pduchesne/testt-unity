@@ -86,7 +86,11 @@ namespace GeoGame3D.UI
             }
 
             // Create texture for tile grid
-            int textureSize = tileSize * tileGridSize;
+            // Actual grid size is 2 * gridOffset + 1 (e.g., -2 to +2 = 5 tiles)
+            int gridOffset = tileGridSize / 2;
+            int actualGridSize = 2 * gridOffset + 1;
+            int textureSize = tileSize * actualGridSize;
+
             if (mapTexture != null)
             {
                 Destroy(mapTexture);
@@ -201,7 +205,11 @@ namespace GeoGame3D.UI
 
                     // Calculate position in the grid texture
                     int startX = gridX * tileSize;
-                    int startY = gridY * tileSize;
+                    // Flip Y: OSM Y increases south, but texture Y=0 is bottom
+                    // North tiles (small tileY) should be at top of texture (high Y)
+                    // Actual grid size is determined by the texture, not tileGridSize
+                    int actualGridSize = mapTexture.height / tileSize;
+                    int startY = (actualGridSize - 1 - gridY) * tileSize;
 
                     // Copy pixels to the grid position
                     for (int py = 0; py < tileSize; py++)
