@@ -134,11 +134,12 @@ namespace GeoGame3D.UI
 
             // Calculate UV rect to display the portion of the texture centered on the point
             // The UV rect should show a pixelSize x pixelSize area centered on (pixelX, pixelY)
+            // For map panning: offset moves OPPOSITE to aircraft movement to keep aircraft centered
             float uvWidth = pixelSize / (float)textureSize;
             float uvHeight = pixelSize / (float)textureSize;
 
             float uvCenterX = pixelX / textureSize;
-            float uvCenterY = pixelY / textureSize;
+            float uvCenterY = 1.0f - (pixelY / textureSize); // Flip Y axis for correct panning direction
 
             Rect uvRect = new Rect(
                 uvCenterX - uvWidth / 2f,
