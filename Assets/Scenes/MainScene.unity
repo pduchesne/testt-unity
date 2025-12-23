@@ -1640,6 +1640,7 @@ MonoBehaviour:
   mapPixelSize: 512
   rotateWithAircraft: 1
   aircraftIconColor: {r: 1, g: 0, b: 0, a: 1}
+  updateThreshold: 0.00001
 --- !u!222 &356988550
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2334,7 +2335,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1233213612}
+  m_Father: {fileID: 1872813215}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3402,8 +3403,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 672405493}
+  m_Children: []
   m_Father: {fileID: 1872813215}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -4770,6 +4770,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1233213612}
+  - {fileID: 672405493}
   m_Father: {fileID: 356988547}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

@@ -24,10 +24,13 @@ namespace GeoGame3D.UI
         [Header("Display Settings")]
         [SerializeField] private bool rotateWithAircraft = true; // Rotate map or keep north up
         [SerializeField] private Color aircraftIconColor = Color.red;
+        [SerializeField] private float updateThreshold = 0.00001f; // Minimum position change to trigger update (degrees)
 
         // Current aircraft geospatial position
         private double currentLongitude;
         private double currentLatitude;
+        private double previousLongitude;
+        private double previousLatitude;
 
         private void Start()
         {
@@ -64,6 +67,8 @@ namespace GeoGame3D.UI
 
             // Initialize with current position
             UpdateAircraftPosition();
+            previousLatitude = currentLatitude;
+            previousLongitude = currentLongitude;
         }
 
         private void Update()
@@ -115,8 +120,18 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Update map to center on aircraft position
-            mapDisplay.UpdateMap(currentLatitude, currentLongitude, zoomLevel, mapPixelSize);
+            // Only update if position changed significantly to reduce flickering
+            double latDiff = System.Math.Abs(currentLatitude - previousLatitude);
+            double lonDiff = System.Math.Abs(currentLongitude - previousLongitude);
+
+            if (latDiff > updateThreshold || lonDiff > updateThreshold)
+            {
+                // Update map to center on aircraft position
+                mapDisplay.UpdateMap(currentLatitude, currentLongitude, zoomLevel, mapPixelSize);
+
+                previousLatitude = currentLatitude;
+                previousLongitude = currentLongitude;
+            }
         }
 
         /// <summary>
@@ -129,19 +144,26 @@ namespace GeoGame3D.UI
                 return;
             }
 
-            // Aircraft icon is always centered and points upward
-            aircraftIcon.anchoredPosition = Vector2.zero;
-            aircraftIcon.localRotation = Quaternion.identity;
+            float heading = aircraftTransform.eulerAngles.y;
 
-            // Apply rotation to the entire minimap container based on aircraft heading
+            // Aircraft icon is always centered on the MapDisplay
+            aircraftIcon.anchoredPosition = Vector2.zero;
+
             if (rotateWithAircraft)
             {
-                float heading = aircraftTransform.eulerAngles.y;
+                // Rotate map so aircraft heading is "up"
                 minimapContainer.localRotation = Quaternion.Euler(0, 0, -heading);
+
+                // Icon doesn't rotate - it always points up (which is the aircraft's heading)
+                aircraftIcon.localRotation = Quaternion.identity;
             }
             else
             {
+                // Map stays north-up
                 minimapContainer.localRotation = Quaternion.identity;
+
+                // Icon rotates to show aircraft heading
+                aircraftIcon.localRotation = Quaternion.Euler(0, 0, -heading);
             }
         }
 
