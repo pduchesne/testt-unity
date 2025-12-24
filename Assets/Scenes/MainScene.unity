@@ -3608,6 +3608,7 @@ GameObject:
   - component: {fileID: 1329578261}
   - component: {fileID: 1329578260}
   - component: {fileID: 1329578266}
+  - component: {fileID: 1329578267}
   m_Layer: 0
   m_Name: Aircraft
   m_TagString: Untagged
@@ -3806,6 +3807,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ec6d8147ac44384b983c29f2d2997e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GeoGame3D.Aircraft.FlightInputHandler
+--- !u!114 &1329578267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329578259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dcef0bbb992f71598fb8ddeb8ecf4a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GeoGame3D.Weapons.MissileLauncher
+  missilePrefab: {fileID: 6325089828057865747, guid: 38188970fb0411368b9153ccb4b5dedc, type: 3}
+  launchPoint: {fileID: 495631692}
+  maxAmmo: 10
+  cooldownTime: 1
 --- !u!1 &1490119859
 GameObject:
   m_ObjectHideFlags: 0
@@ -4415,7 +4432,7 @@ MonoBehaviour:
   altitudeText: {fileID: 1197755240}
   headingText: {fileID: 728453640}
   throttleText: {fileID: 1177188416}
-  ammoText: {fileID: 0}
+  ammoText: {fileID: 161466425}
   attitudeText: {fileID: 343548420}
   verticalSpeedText: {fileID: 261910515}
   angleOfAttackText: {fileID: 295667300}
