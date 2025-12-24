@@ -18,5 +18,12 @@
       "UC-001",
       "UC-002"
     ]
+  },
+  {
+    "id": "REQ-NF007",
+    "title": "Automated multi-platform build and distribution system",
+    "description": "",
+    "priority": "medium",
+    "useCases": []
   }
 ]

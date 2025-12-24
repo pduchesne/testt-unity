@@ -379,6 +379,29 @@
       ],
       "status": "completed",
       "progress": 100
+    },
+    {
+      "id": "IMPL-019",
+      "title": "Implement automated multi-platform build system",
+      "description": "Create an automated build pipeline that produces distributable executables for Windows, Mac, and Linux platforms. The build system must be fully automatable and integrable with CI/CD pipelines (GitHub Actions, GitLab CI, etc.).\n\n## Build Targets:\n- **Windows**: x86_64 standalone build (.exe + data folder)\n- **macOS**: Universal binary (Intel + Apple Silicon) app bundle (.app)\n- **Linux**: x86_64 standalone build (executable + data folder)\n\n## Automation Requirements:\n- Builds triggered by git tags (e.g., v1.0.0) or manual workflow dispatch\n- No manual intervention required during build process\n- Cesium ion token configured via environment variable or secrets\n- Build artifacts automatically uploaded and versioned\n- All three platform builds complete in single pipeline run (parallel jobs)\n\n## Build Configuration:\n- Release mode (Development Build: OFF, Script Debugging: OFF)\n- Compression: LZ4 for faster load times\n- Quality settings optimized for each platform\n- Custom app icon and splash screen configured\n- Version number automatically from git tag\n\n## Distribution Artifacts:\n- **Windows**: FlightSim_Windows_v{VERSION}.zip (~200-400 MB)\n- **macOS**: FlightSim_Mac_v{VERSION}.dmg (~200-400 MB)\n- **Linux**: FlightSim_Linux_v{VERSION}.tar.gz (~200-400 MB)\n\n## CI/CD Pipeline Features:\n- GitHub Actions workflow with platform-specific runners:\n  - windows-latest runner for Windows build\n  - macos-latest runner for macOS build\n  - ubuntu-latest runner for Linux build\n- Unity License activation in CI environment\n- Parallel platform builds (3 jobs running simultaneously)\n- Artifact caching for faster subsequent builds\n- Automatic GitHub Release creation with all three artifacts\n- Build status badges in README\n- Optional: itch.io automatic deployment\n\n## Special Considerations - Cesium for Unity:\n- **Native compilation required**: Cesium uses a build hook (CompileCesiumForUnityNative.cs) that automatically compiles C++ native libraries during Unity build\n- **Platform-specific toolchains required on each runner**:\n  - Windows: CMake 3.18+, Visual Studio 2022, .NET SDK 6.0+\n  - macOS: CMake 3.18+, Xcode Command Line Tools, .NET SDK 6.0+\n  - Linux: CMake 3.18+, GCC/Clang C++20, .NET SDK 6.0+\n- **Cross-compilation NOT supported**: Each platform must be built on its native OS\n- **Build time**: First build takes 5-10 minutes per platform (native C++ compilation)\n- **Cesium ion access token** must be injected securely (not hardcoded)\n- Streaming assets included for offline Cesium cache\n\n## Testing Strategy:\n- Automated smoke tests post-build (can launch, basic functionality)\n- Manual QA checklist for each release\n- Test on clean machines without Unity installed",
+      "implements": [
+        "REQ-NF007"
+      ],
+      "component": "Build System",
+      "priority": "high",
+      "dependencies": [
+        "IMPL-018"
+      ],
+      "deliverables": [
+        "Build script (build.sh)",
+        "GitHub Actions workflow (.github/workflows/build.yml)",
+        "Unity build settings configuration",
+        "Player settings with proper metadata",
+        "README.txt with system requirements and controls",
+        "Version management script",
+        "CI/CD documentation",
+        "Platform-specific packaging scripts (DMG for Mac, ZIP for Windows, tar.gz for Linux)"
+      ]
     }
   ],
   "milestones": [
