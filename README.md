@@ -1,5 +1,9 @@
 # GeoGame3D - 3D Flight Simulation Game
 
+[![Build Multi-Platform](https://github.com/pduchesne/geogame3d/actions/workflows/build.yml/badge.svg)](https://github.com/pduchesne/geogame3d/actions/workflows/build.yml)
+[![Unity Version](https://img.shields.io/badge/Unity-6000.3.2f1-blue.svg)](https://unity.com/)
+[![License](https://img.shields.io/badge/license-TBD-lightgrey.svg)](LICENSE)
+
 A high-performance 3D flight simulation game built with Unity and Cesium for Unity, featuring dynamic terrain and building loading from open standard datasets.
 
 ## Overview
@@ -128,6 +132,44 @@ geogame3d/
 3. Click the Play button in the Unity Editor
 
 ### Building
+
+The project includes an automated multi-platform build system for Windows, macOS, and Linux.
+
+#### Quick Build (Local)
+
+```bash
+# Build for specific platform
+./scripts/build.sh windows 1.0.0
+./scripts/build.sh mac 1.0.0
+./scripts/build.sh linux 1.0.0
+
+# Build all platforms
+./scripts/build.sh all 1.0.0
+```
+
+Output: `Builds/FlightSim_{Platform}_v{Version}.{ext}`
+
+#### Automated Builds (CI/CD)
+
+Push a git tag to trigger automated builds for all platforms:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This creates a GitHub Release with Windows, macOS, and Linux builds.
+
+#### Requirements
+
+- **Unity 6000.3.2f1**
+- **CMake 3.18+**
+- **.NET SDK 6.0+**
+- **Platform-specific compilers** (MSVC/Xcode/GCC)
+
+See [Build System Documentation](docs/BUILD_SYSTEM.md) for detailed setup and troubleshooting.
+
+#### Manual Build (Unity Editor)
 
 1. File → Build Settings
 2. Select target platform (Windows, macOS, Linux)

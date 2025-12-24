@@ -7,6 +7,10 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 
+# Node modules (for build scripts)
+node_modules/
+package-lock.json
+
 # Memory Captures
 /[Mm]emoryCaptures/
 
