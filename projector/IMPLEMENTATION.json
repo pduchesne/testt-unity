@@ -351,6 +351,34 @@
         "Live update system (every frame)",
         "Tile boundary detection and auto-fetch"
       ]
+    },
+    {
+      "id": "IMPL-018",
+      "title": "Implement ballistic missile firing system",
+      "description": "Successfully implemented a complete missile firing system with visual explosions and limited ammo. Features:\n- MissileLauncher.cs: Weapon system managing ammo (10 missiles), cooldown (1s), and missile spawning\n- Missile.cs: Ballistic projectile with raycast collision detection for Cesium buildings\n- ExplosionEffect.cs: Particle system controller with auto-cleanup\n- FlightInputHandler integration: Spacebar fires missiles\n- FlightHUD integration: Ammo display with color-coded status (green/yellow/red)\n- Missile.prefab: Cylinder mesh (scale 1,1,5) with Rigidbody for ballistic physics\n- Explosion.prefab: Particle system with visual effects\n- Raycast-based collision: Works with Cesium 3D Tiles that have no colliders\n- Ballistic physics: Initial velocity = aircraft velocity + 100 m/s forward thrust\n- Limited ammo system: 10 missiles, cannot fire when empty\n- One missile at a time: Previous missile must hit before next can fire\n- Auto-cleanup: Missiles destroy after 10s, explosions after 2s",
+      "implements": [
+        "REQ-F009"
+      ],
+      "component": "Weapons",
+      "priority": "medium",
+      "dependencies": [
+        "IMPL-006",
+        "IMPL-007",
+        "IMPL-010"
+      ],
+      "deliverables": [
+        "Assets/Scripts/Weapons/MissileLauncher.cs",
+        "Assets/Scripts/Weapons/Missile.cs",
+        "Assets/Scripts/Weapons/ExplosionEffect.cs",
+        "Assets/Prefabs/Missile.prefab",
+        "Assets/Prefabs/Explosion.prefab",
+        "Updated FlightInputHandler.cs",
+        "Updated FlightHUD.cs",
+        "MISSILE_SETUP.md",
+        "MissileLaunchSetup.cs editor script"
+      ],
+      "status": "completed",
+      "progress": 100
     }
   ],
   "milestones": [
