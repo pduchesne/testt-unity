@@ -162,7 +162,7 @@ MonoBehaviour:
   collisionLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  explosionPrefab: {fileID: 0}
+  explosionPrefab: {fileID: 9190080373851620288, guid: 784ae78849370fe3fbb8c20177cdc56f, type: 3}
 --- !u!114 &8645411499088290924
 MonoBehaviour:
   m_ObjectHideFlags: 0
