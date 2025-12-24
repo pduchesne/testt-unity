@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using GeoGame3D.Weapons;
 
 namespace GeoGame3D.Aircraft
 {
@@ -11,10 +12,12 @@ namespace GeoGame3D.Aircraft
     public class FlightInputHandler : MonoBehaviour
     {
         private AircraftController controller;
+        private MissileLauncher missileLauncher;
 
         private void Awake()
         {
             controller = GetComponent<AircraftController>();
+            missileLauncher = GetComponent<MissileLauncher>();
         }
 
         private void Update()
@@ -52,6 +55,12 @@ namespace GeoGame3D.Aircraft
             if (keyboard.leftShiftKey.isPressed) throttle = 1f;
             if (keyboard.leftCtrlKey.isPressed) throttle = -1f;
             SendThrottle(throttle);
+
+            // Missile firing from Spacebar
+            if (missileLauncher != null && keyboard.spaceKey.wasPressedThisFrame)
+            {
+                missileLauncher.Fire();
+            }
         }
         
         private void SendPitchRoll(Vector2 value)

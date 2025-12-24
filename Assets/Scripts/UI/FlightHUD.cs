@@ -11,12 +11,14 @@ namespace GeoGame3D.UI
     {
         [Header("References")]
         [SerializeField] private GeoGame3D.Aircraft.AircraftController aircraft;
+        [SerializeField] private GeoGame3D.Weapons.MissileLauncher missileLauncher;
 
         [Header("UI Elements - Basic")]
         [SerializeField] private TextMeshProUGUI speedText;
         [SerializeField] private TextMeshProUGUI altitudeText;
         [SerializeField] private TextMeshProUGUI headingText;
         [SerializeField] private TextMeshProUGUI throttleText;
+        [SerializeField] private TextMeshProUGUI ammoText;
 
         [Header("UI Elements - Advanced Instruments")]
         [SerializeField] private TextMeshProUGUI attitudeText;
@@ -59,6 +61,20 @@ namespace GeoGame3D.UI
                 Debug.Log($"FlightHUD: AircraftController already assigned in Inspector");
             }
 
+            if (missileLauncher == null)
+            {
+                missileLauncher = FindObjectOfType<GeoGame3D.Weapons.MissileLauncher>();
+
+                if (missileLauncher == null)
+                {
+                    Debug.LogWarning("FlightHUD: No MissileLauncher found in scene (weapons disabled)");
+                }
+                else
+                {
+                    Debug.Log($"FlightHUD: Found MissileLauncher via FindObjectOfType");
+                }
+            }
+
             ValidateUIElements();
             Debug.Log("FlightHUD: Start() complete");
         }
@@ -83,6 +99,7 @@ namespace GeoGame3D.UI
             UpdateAngleOfAttack();
             UpdateGForce();
             UpdateStallWarning();
+            UpdateAmmo();
         }
 
         private void UpdateSpeed()
@@ -277,6 +294,30 @@ namespace GeoGame3D.UI
             else
             {
                 stallWarningText.enabled = false;
+            }
+        }
+
+        private void UpdateAmmo()
+        {
+            if (ammoText == null || missileLauncher == null) return;
+
+            int currentAmmo = missileLauncher.CurrentAmmo;
+            int maxAmmo = missileLauncher.MaxAmmo;
+
+            ammoText.text = $"AMMO: {currentAmmo}/{maxAmmo}";
+
+            // Color code based on ammo level
+            if (currentAmmo == 0)
+            {
+                ammoText.color = Color.red;
+            }
+            else if (currentAmmo <= maxAmmo / 3)
+            {
+                ammoText.color = Color.yellow;
+            }
+            else
+            {
+                ammoText.color = Color.green;
             }
         }
 
