@@ -170,6 +170,18 @@ Total pipeline time: ~15 minutes (parallel execution)
 
 ## Cesium for Unity Considerations
 
+### Linux Platform Support
+
+⚠️ **Important**: Cesium for Unity doesn't include Linux in its default platform list. You must apply a patch before building for Linux:
+
+```bash
+./scripts/patch-cesium-linux.sh
+```
+
+This adds `LinuxStandalone64` to the Cesium assembly definition. See [CESIUM_LINUX_FIX.md](CESIUM_LINUX_FIX.md) for details.
+
+**Note**: Re-run this script after updating the Cesium package, as the change will be lost.
+
 ### Native Compilation
 
 Cesium for Unity includes native C++ libraries that must be compiled during the build process:

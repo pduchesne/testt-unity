@@ -6,6 +6,9 @@
 ```bash
 export UNITY_PATH="/path/to/Unity"
 export CESIUM_ION_TOKEN="your_token"  # Optional
+
+# Required for Linux builds
+./scripts/patch-cesium-linux.sh
 ```
 
 ### Build Commands
