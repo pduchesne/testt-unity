@@ -34,6 +34,12 @@ public static class BuildScript
             BuildTarget target = ParseBuildTarget(buildTarget);
             Debug.Log($"Building for target: {target}");
 
+            // Apply Cesium Linux patch if building for Linux
+            if (target == BuildTarget.StandaloneLinux64)
+            {
+                ApplyCesiumLinuxPatch();
+            }
+
             // Configure build options
             BuildPlayerOptions buildOptions = new BuildPlayerOptions
             {
@@ -85,6 +91,70 @@ public static class BuildScript
         {
             Debug.LogError($"Build exception: {e}");
             EditorApplication.Exit(1);
+        }
+    }
+
+    /// <summary>
+    /// Apply Linux support patch to Cesium for Unity package.
+    /// Adds LinuxStandalone64 to the assembly definition if not already present.
+    /// </summary>
+    private static void ApplyCesiumLinuxPatch()
+    {
+        try
+        {
+            // Find Cesium package in PackageCache
+            string packageCachePath = Path.Combine(Application.dataPath, "..", "Library", "PackageCache");
+
+            if (!Directory.Exists(packageCachePath))
+            {
+                Debug.LogWarning("PackageCache directory not found - Cesium may not be resolved yet");
+                return;
+            }
+
+            // Find com.cesium.unity directory (it will have a hash suffix)
+            string[] cesiumDirs = Directory.GetDirectories(packageCachePath, "com.cesium.unity@*");
+
+            if (cesiumDirs.Length == 0)
+            {
+                Debug.LogWarning("Cesium package not found in PackageCache");
+                return;
+            }
+
+            string cesiumPath = cesiumDirs[0];
+            string asmdefPath = Path.Combine(cesiumPath, "Source", "CesiumForUnity.asmdef");
+
+            if (!File.Exists(asmdefPath))
+            {
+                Debug.LogWarning($"Cesium assembly definition not found at: {asmdefPath}");
+                return;
+            }
+
+            // Read and check if Linux support is already present
+            string asmdefContent = File.ReadAllText(asmdefPath);
+
+            if (asmdefContent.Contains("LinuxStandalone64"))
+            {
+                Debug.Log("Cesium Linux support already present");
+                return;
+            }
+
+            // Add Linux support after iOS in the includePlatforms list
+            string modifiedContent = asmdefContent.Replace(
+                "\"iOS\",",
+                "\"iOS\",\n        \"LinuxStandalone64\","
+            );
+
+            // Write back the modified content
+            File.WriteAllText(asmdefPath, modifiedContent);
+
+            Debug.Log($"Applied Cesium Linux patch to: {asmdefPath}");
+
+            // Refresh AssetDatabase to pick up changes
+            AssetDatabase.Refresh();
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Failed to apply Cesium Linux patch: {e.Message}");
         }
     }
 
