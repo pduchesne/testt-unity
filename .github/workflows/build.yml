@@ -50,9 +50,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Windows-v2-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-Windows-
+            Library-Windows-v2-
 
       - name: Setup Unity
         uses: game-ci/unity-builder@v4
@@ -110,9 +110,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-Mac-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Mac-v2-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-Mac-
+            Library-Mac-v2-
 
       - name: Setup Unity
         uses: game-ci/unity-builder@v4
@@ -180,9 +180,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-Linux-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Linux-v2-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-Linux-
+            Library-Linux-v2-
 
       - name: Setup Unity
         uses: game-ci/unity-builder@v4
