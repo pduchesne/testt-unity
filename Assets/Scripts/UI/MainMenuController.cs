@@ -1,17 +1,25 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using TMPro;
+using GeoGame3D.Vehicles;
 
 namespace GeoGame3D.UI
 {
     /// <summary>
     /// Manages the main menu overlay that can be toggled with ESC key
-    /// Handles pause/resume and game exit functionality
+    /// Handles pause/resume, game exit, and vehicle mode switching
     /// </summary>
     public class MainMenuController : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private GameObject menuPanel;
+        [SerializeField] private TextMeshProUGUI modeDisplayText;
+
+        [Header("Vehicle Mode")]
+        [SerializeField] private VehicleModeManager vehicleModeManager;
+        [SerializeField] private FlightHUD flightHUD;
+        [SerializeField] private DrivingHUD drivingHUD;
 
         [Header("Settings")]
         [SerializeField] private bool startPaused = false;
@@ -31,6 +39,34 @@ namespace GeoGame3D.UI
             else
             {
                 Debug.LogError("MainMenuController: Menu panel reference not assigned!");
+            }
+
+            // Find VehicleModeManager if not assigned
+            if (vehicleModeManager == null)
+            {
+                vehicleModeManager = FindFirstObjectByType<VehicleModeManager>();
+                if (vehicleModeManager == null)
+                {
+                    Debug.LogWarning("MainMenuController: No VehicleModeManager found - mode switching disabled");
+                }
+            }
+
+            // Find HUDs if not assigned
+            if (flightHUD == null)
+            {
+                flightHUD = FindFirstObjectByType<FlightHUD>();
+            }
+            if (drivingHUD == null)
+            {
+                drivingHUD = FindFirstObjectByType<DrivingHUD>();
+            }
+
+            // Subscribe to mode changes
+            if (vehicleModeManager != null)
+            {
+                vehicleModeManager.OnModeChanged += OnVehicleModeChanged;
+                // Update display to match initial mode
+                OnVehicleModeChanged(vehicleModeManager.CurrentMode);
             }
 
             wasInitialized = true;
@@ -122,6 +158,62 @@ namespace GeoGame3D.UI
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
             }
+        }
+
+        /// <summary>
+        /// Switch vehicle mode (called by mode switch button)
+        /// </summary>
+        public void OnSwitchModeClicked()
+        {
+            if (vehicleModeManager == null)
+            {
+                Debug.LogWarning("MainMenuController: Cannot switch mode - VehicleModeManager not found");
+                return;
+            }
+
+            vehicleModeManager.SwitchMode();
+            Debug.Log($"MainMenuController: Switching to {vehicleModeManager.CurrentMode} mode");
+        }
+
+        /// <summary>
+        /// Handle mode change event from VehicleModeManager
+        /// </summary>
+        private void OnVehicleModeChanged(VehicleMode newMode)
+        {
+            UpdateModeDisplay(newMode);
+            UpdateHUDVisibility(newMode);
+        }
+
+        /// <summary>
+        /// Update the mode display text
+        /// </summary>
+        private void UpdateModeDisplay(VehicleMode mode)
+        {
+            if (modeDisplayText != null)
+            {
+                string modeString = mode == VehicleMode.Aircraft ? "AIRCRAFT" : "GROUND VEHICLE";
+                modeDisplayText.text = $"Mode: {modeString}";
+            }
+        }
+
+        /// <summary>
+        /// Update HUD visibility based on vehicle mode
+        /// </summary>
+        private void UpdateHUDVisibility(VehicleMode mode)
+        {
+            bool isAircraft = (mode == VehicleMode.Aircraft);
+
+            if (flightHUD != null)
+            {
+                flightHUD.gameObject.SetActive(isAircraft);
+            }
+
+            if (drivingHUD != null)
+            {
+                drivingHUD.gameObject.SetActive(!isAircraft);
+            }
+
+            Debug.Log($"MainMenuController: Updated HUD visibility for {mode} mode");
         }
 
         /// <summary>

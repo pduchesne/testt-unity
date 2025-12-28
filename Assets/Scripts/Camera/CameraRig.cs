@@ -1,18 +1,28 @@
 using UnityEngine;
+using GeoGame3D.Vehicles;
 
 namespace GeoGame3D.Camera
 {
     /// <summary>
     /// Smooth camera follow system with banking effects for aircraft
+    /// Mode-aware behavior for different vehicle types
     /// </summary>
     public class CameraRig : MonoBehaviour
     {
         [Header("Target")]
         [SerializeField] private Transform target;
 
+        [Header("Mode-Specific Settings")]
+        [SerializeField] private Vector3 aircraftBaseOffset = new Vector3(0f, 5f, -15f);
+        [SerializeField] private Vector3 groundBaseOffset = new Vector3(0f, 3f, -8f);
+        [SerializeField] private float aircraftBaseFOV = 60f;
+        [SerializeField] private float groundBaseFOV = 65f;
+        [SerializeField] private float aircraftFollowSpeed = 8f;
+        [SerializeField] private float groundFollowSpeed = 12f;
+
         [Header("Follow Settings")]
-        [SerializeField] private Vector3 baseOffset = new Vector3(0f, 5f, -15f); // Offset at low speed
-        [SerializeField] private float followSpeed = 8f;
+        [SerializeField] private Vector3 baseOffset = new Vector3(0f, 5f, -15f); // Active offset (updated by mode)
+        [SerializeField] private float followSpeed = 8f;  // Active follow speed (updated by mode)
         [SerializeField] private float rotationSpeed = 6f;
         [SerializeField] private float maxDeviationAngle = 30f; // Max degrees camera can deviate from aircraft axis
         [SerializeField] private float minDistance = 10f; // Minimum distance from aircraft
@@ -38,8 +48,10 @@ namespace GeoGame3D.Camera
 
         private UnityEngine.Camera cam;
         private GeoGame3D.Aircraft.AircraftController aircraft;
+        private GroundVehicleController groundVehicle;
         private Quaternion lastRotation;
         private Rigidbody targetRigidbody;
+        private VehicleMode currentMode = VehicleMode.Aircraft;
 
         private void Awake()
         {
@@ -58,7 +70,17 @@ namespace GeoGame3D.Camera
             if (target != null)
             {
                 aircraft = target.GetComponent<GeoGame3D.Aircraft.AircraftController>();
+                groundVehicle = target.GetComponent<GroundVehicleController>();
                 targetRigidbody = target.GetComponent<Rigidbody>();
+
+                // Subscribe to mode changes
+                VehicleModeManager modeManager = target.GetComponent<VehicleModeManager>();
+                if (modeManager != null)
+                {
+                    modeManager.OnModeChanged += SetVehicleMode;
+                    // Set initial mode
+                    SetVehicleMode(modeManager.CurrentMode);
+                }
             }
 
             if (target == null)
@@ -74,7 +96,7 @@ namespace GeoGame3D.Camera
             UpdatePosition();
             UpdateRotation();
 
-            if (enableDynamicFOV && cam != null && aircraft != null)
+            if (enableDynamicFOV && cam != null)
             {
                 UpdateDynamicFOV();
             }
@@ -84,9 +106,18 @@ namespace GeoGame3D.Camera
         {
             // Calculate dynamic offset based on speed
             Vector3 currentOffset = baseOffset;
-            if (enableDynamicDistance && aircraft != null)
+            if (enableDynamicDistance)
             {
-                float speed = aircraft.Speed;
+                float speed = 0f;
+                if (currentMode == VehicleMode.Aircraft && aircraft != null)
+                {
+                    speed = aircraft.Speed;
+                }
+                else if (currentMode == VehicleMode.Ground && groundVehicle != null)
+                {
+                    speed = groundVehicle.Speed;
+                }
+
                 float speedFactor = Mathf.Clamp01((speed - minSpeedForDistance) / (maxSpeedForDistance - minSpeedForDistance));
                 float distanceScale = Mathf.Lerp(1f, distanceMultiplier, speedFactor);
                 currentOffset = baseOffset * distanceScale;
@@ -151,8 +182,8 @@ namespace GeoGame3D.Camera
             Vector3 lookDirection = target.position - transform.position;
             Quaternion desiredRotation = Quaternion.LookRotation(lookDirection);
 
-            // Apply banking effect if enabled
-            if (enableBanking)
+            // Apply banking effect if enabled (only for aircraft mode)
+            if (enableBanking && currentMode == VehicleMode.Aircraft)
             {
                 // Get the roll angle from the target
                 float targetRoll = target.localEulerAngles.z;
@@ -170,8 +201,18 @@ namespace GeoGame3D.Camera
 
         private void UpdateDynamicFOV()
         {
+            float speed = 0f;
+            if (currentMode == VehicleMode.Aircraft && aircraft != null)
+            {
+                speed = aircraft.Speed;
+            }
+            else if (currentMode == VehicleMode.Ground && groundVehicle != null)
+            {
+                speed = groundVehicle.Speed;
+            }
+
             // Calculate target FOV based on speed
-            float speedFactor = Mathf.Clamp01((aircraft.Speed - speedThreshold) / speedThreshold);
+            float speedFactor = Mathf.Clamp01((speed - speedThreshold) / speedThreshold);
             float targetFOV = Mathf.Lerp(baseFOV, maxFOV, speedFactor);
 
             // Smoothly transition FOV
@@ -189,8 +230,39 @@ namespace GeoGame3D.Camera
             if (target != null)
             {
                 aircraft = target.GetComponent<GeoGame3D.Aircraft.AircraftController>();
+                groundVehicle = target.GetComponent<GroundVehicleController>();
                 targetRigidbody = target.GetComponent<Rigidbody>();
             }
+        }
+
+        /// <summary>
+        /// Set vehicle mode for camera behavior
+        /// </summary>
+        public void SetVehicleMode(VehicleMode mode)
+        {
+            currentMode = mode;
+
+            // Update camera settings based on mode
+            if (mode == VehicleMode.Aircraft)
+            {
+                baseOffset = aircraftBaseOffset;
+                followSpeed = aircraftFollowSpeed;
+                baseFOV = aircraftBaseFOV;
+            }
+            else // Ground
+            {
+                baseOffset = groundBaseOffset;
+                followSpeed = groundFollowSpeed;
+                baseFOV = groundBaseFOV;
+            }
+
+            // Immediately update camera FOV
+            if (cam != null)
+            {
+                cam.fieldOfView = baseFOV;
+            }
+
+            Debug.Log($"CameraRig: Switched to {mode} mode with offset {baseOffset}, FOV {baseFOV}");
         }
 
         #endregion

@@ -74,5 +74,33 @@
     "useCases": [
       "UC-004"
     ]
+  },
+  {
+    "id": "REQ-F014",
+    "title": "Ground vehicle controller with physics-based movement",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-005"
+    ]
+  },
+  {
+    "id": "REQ-F015",
+    "title": "Terrain collision and surface following for ground vehicles",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-005"
+    ]
+  },
+  {
+    "id": "REQ-F016",
+    "title": "Vehicle mode switching system (aircraft ↔ ground vehicle)",
+    "description": "",
+    "priority": "medium",
+    "useCases": [
+      "UC-005",
+      "UC-001"
+    ]
   }
 ]

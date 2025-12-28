@@ -50,5 +50,19 @@
     "parent": null,
     "description": "See flight information on HUD",
     "priority": "medium"
+  },
+  {
+    "id": "UC-005",
+    "title": "Drive ground vehicle on terrain",
+    "keywords": [
+      "ground vehicle",
+      "car",
+      "driving",
+      "terrain following",
+      "mode switching"
+    ],
+    "parent": null,
+    "description": "Drive ground vehicle on terrain",
+    "priority": "medium"
   }
 ]

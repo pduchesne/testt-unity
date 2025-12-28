@@ -430,6 +430,86 @@
         "Configured menu buttons with event handlers",
         "Tested pause/resume and geocoding functionality"
       ]
+    },
+    {
+      "id": "IMPL-021",
+      "title": "Create GroundVehicleController with physics-based driving",
+      "description": "Create GroundVehicleController with physics-based driving. Implemented with raycast-based suspension system, drive forces, steering, ground alignment, and friction. Includes GroundVehicleInputHandler for keyboard input following the FlightInputHandler pattern.",
+      "implements": [
+        "REQ-F014"
+      ],
+      "component": "Vehicle System",
+      "priority": "high",
+      "dependencies": [],
+      "deliverables": [
+        "Assets/Scripts/Vehicle/GroundVehicleController.cs",
+        "Assets/Scripts/Vehicle/GroundVehicleInputHandler.cs",
+        "Tested driving physics in play mode"
+      ],
+      "status": "completed",
+      "progress": 100
+    },
+    {
+      "id": "IMPL-022",
+      "title": "Implement terrain following and collision for ground vehicles",
+      "description": "Implement terrain following and collision for ground vehicles. Completed raycast suspension with 4-wheel ground detection, spring-damper physics, slope alignment using quaternion rotation, and LayerMask filtering for terrain collision.",
+      "implements": [
+        "REQ-F015"
+      ],
+      "component": "Vehicle System",
+      "priority": "high",
+      "dependencies": [
+        "IMPL-021"
+      ],
+      "deliverables": [
+        "Terrain following logic in GroundVehicleController",
+        "Collision detection setup",
+        "Tested on various terrain slopes"
+      ],
+      "status": "completed",
+      "progress": 100
+    },
+    {
+      "id": "IMPL-023",
+      "title": "Create VehicleModeManager for switching between aircraft and ground vehicle",
+      "description": "Create VehicleModeManager for switching between aircraft and ground vehicle. Implemented with terrain spawn positioning, physics state transitions, controller enable/disable logic, and event system for camera/HUD notifications.",
+      "implements": [
+        "REQ-F016"
+      ],
+      "component": "Vehicle System",
+      "priority": "high",
+      "dependencies": [
+        "IMPL-021",
+        "IMPL-022"
+      ],
+      "deliverables": [
+        "Assets/Scripts/Vehicle/VehicleModeManager.cs",
+        "Mode switching logic",
+        "Tested mode transitions"
+      ],
+      "status": "completed",
+      "progress": 100
+    },
+    {
+      "id": "IMPL-024",
+      "title": "Add vehicle mode switching to main menu",
+      "description": "Add vehicle mode switching to main menu. Modified MainMenuController to support mode switching via OnSwitchModeClicked(), added mode display text, implemented HUD visibility toggling between FlightHUD and DrivingHUD. Also modified CameraRig for mode-aware camera behavior with separate settings for aircraft and ground modes.",
+      "implements": [
+        "REQ-F016"
+      ],
+      "component": "UI System",
+      "priority": "medium",
+      "dependencies": [
+        "IMPL-023",
+        "IMPL-020"
+      ],
+      "deliverables": [
+        "Updated MainMenuCanvas with mode switch UI",
+        "Wired mode switch button",
+        "Visual mode indicator"
+      ],
+      "status": "completed",
+      "progress": 100
     }
   ],
   "milestones": [
