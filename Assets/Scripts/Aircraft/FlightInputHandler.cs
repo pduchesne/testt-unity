@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using GeoGame3D.Weapons;
+using GeoGame3D.UI;
 
 namespace GeoGame3D.Aircraft
 {
@@ -13,17 +14,22 @@ namespace GeoGame3D.Aircraft
     {
         private AircraftController controller;
         private MissileLauncher missileLauncher;
+        private MainMenuController mainMenu;
 
         private void Awake()
         {
             controller = GetComponent<AircraftController>();
             missileLauncher = GetComponent<MissileLauncher>();
+            mainMenu = FindObjectOfType<MainMenuController>();
         }
 
         private void Update()
         {
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
+
+            // Don't process flight inputs if menu is active
+            if (mainMenu != null && mainMenu.IsMenuActive) return;
 
             // Pitch and Roll from WASD or arrow keys
             Vector2 pitchRoll = Vector2.zero;
