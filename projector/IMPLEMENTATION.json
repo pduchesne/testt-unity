@@ -404,6 +404,30 @@
       ],
       "status": "completed",
       "progress": 100
+    },
+    {
+      "id": "IMPL-020",
+      "title": "Implement main menu with ESC key toggle and pause functionality",
+      "description": "Create a traditional game menu overlay system that can be toggled with the ESC key. The menu should pause the game (Time.timeScale = 0) and provide resume/exit functionality. Design should be extensible for future features like geocoding-based start location selection.\n\n## Current Status:\n**Code Complete** - Scripts and documentation written, Unity UI setup pending\n\n## Implementation Details:\n- **MainMenuController.cs**: Complete script with ESC key handling, pause/resume, cursor management\n- **FlightInputHandler.cs**: Updated to check menu state and block flight inputs when menu is active\n- **Documentation**: Complete setup guide in docs/MAIN_MENU_SETUP.md\n\n## Remaining Work:\n- Unity Editor UI hierarchy creation (Canvas → MenuPanel → Buttons)\n- Component configuration and reference wiring in Inspector\n- Testing in play mode\n\n## Menu Structure:\n```\nMainMenuCanvas (Canvas + MainMenuController)\n└── MenuPanel (Panel - semi-transparent overlay)\n    └── MenuContainer (Vertical Layout)\n        ├── MenuTitle (TextMeshPro - \"PAUSED\")\n        ├── ResumeButton (Button - \"START/RESUME\")\n        └── ExitButton (Button - \"EXIT\")\n```\n\n## Future Extensions Planned:\n- Settings panel (audio, graphics, controls)\n- Geocoding text field for start location selection\n- Save/Load functionality\n- Credits/About screen",
+      "implements": [
+        "REQ-F008"
+      ],
+      "component": "UI System",
+      "priority": "medium",
+      "status": "completed",
+      "progress": 100,
+      "dependencies": [
+        "IMPL-010",
+        "IMPL-007"
+      ],
+      "deliverables": [
+        "Assets/Scripts/UI/MainMenuController.cs",
+        "Updated FlightInputHandler.cs with menu state checking",
+        "docs/MAIN_MENU_SETUP.md documentation",
+        "MainMenuCanvas UI hierarchy (pending)",
+        "Configured menu buttons with event handlers (pending)",
+        "Tested pause/resume functionality (pending)"
+      ]
     }
   ],
   "milestones": [
