@@ -117,7 +117,9 @@
         "Settings UI complete",
         "Score/progression system working"
       ],
-      "implementationTasks": [],
+      "implementationTasks": [
+        "IMPL-020"
+      ],
       "milestones": [
         "M4"
       ]
