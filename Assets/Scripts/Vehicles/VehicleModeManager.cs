@@ -1,4 +1,5 @@
 using UnityEngine;
+using CesiumForUnity;
 using GeoGame3D.Aircraft;
 using GeoGame3D.Utils;
 
@@ -23,7 +24,8 @@ namespace GeoGame3D.Vehicles
         [SerializeField] private VehicleMode startMode = VehicleMode.Aircraft;
 
         [Header("Ground Mode Spawn")]
-        [SerializeField] private float groundSpawnHeight = 2f;  // Height above terrain to spawn
+        [SerializeField] private float groundSpawnHeight = 5f;  // Height above terrain to spawn
+        [SerializeField] private float colliderReenableDelay = 0.5f;  // Delay before re-enabling collider after spawn
         [SerializeField] private float maxTerrainCheckDistance = 1000f;  // Max raycast distance
         [SerializeField] private LayerMask terrainLayer;  // Terrain layer for raycasting
 
@@ -102,6 +104,10 @@ namespace GeoGame3D.Vehicles
                     Debug.LogWarning("[VehicleMode] Calling TransitionToGroundMode...");
                     TransitionToGroundMode();
                     Debug.LogWarning("[VehicleMode] TransitionToGroundMode COMPLETED");
+
+                    // Don't enable ground controller yet - wait for collider to re-enable
+                    // UpdateComponentStates will be called from the coroutine after delay
+                    return;
                 }
                 else
                 {
@@ -126,48 +132,131 @@ namespace GeoGame3D.Vehicles
         /// </summary>
         private void TransitionToGroundMode()
         {
-            // Store current aircraft position for safety checks
             Vector3 aircraftPosition = transform.position;
+
+            SimpleLogger.Info("Vehicle", $"Aircraft position: {aircraftPosition}");
+            SimpleLogger.Info("Vehicle", $"Raycasting from {aircraftPosition} down to find terrain");
+
+            // CRITICAL: Set kinematic FIRST before any position/rotation changes
+            // This prevents Unity physics from applying corrective forces
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            SimpleLogger.Info("Vehicle", "Set Rigidbody to kinematic BEFORE position change");
+
+            // Temporarily disable CesiumGlobeAnchor to prevent geospatial coordinate interference
+            CesiumGlobeAnchor globeAnchor = GetComponent<CesiumGlobeAnchor>();
+            if (globeAnchor != null)
+            {
+                globeAnchor.enabled = false;
+                SimpleLogger.Info("Vehicle", "Disabled CesiumGlobeAnchor during ground spawn");
+            }
+
+            // Temporarily disable collider to prevent physics penetration during spawn
+            CapsuleCollider capsuleCollider = GetComponent<CapsuleCollider>();
+            if (capsuleCollider != null)
+            {
+                capsuleCollider.enabled = false;
+                SimpleLogger.Info("Vehicle", "Disabled CapsuleCollider during ground spawn");
+            }
 
             // Find terrain below current position
             RaycastHit hit;
-
-            SimpleLogger.Info("Vehicle", $"Raycasting from {aircraftPosition} down to find terrain");
 
             if (Physics.Raycast(aircraftPosition, Vector3.down, out hit, maxTerrainCheckDistance, terrainLayer))
             {
                 SimpleLogger.Info("Vehicle", $"Hit terrain: {hit.collider.name} at point {hit.point}, distance {hit.distance}");
 
-                // Position vehicle on terrain
+                // Position vehicle on terrain (safe now that rigidbody is kinematic)
                 Vector3 spawnPosition = hit.point + Vector3.up * groundSpawnHeight;
-                float dropDistance = aircraftPosition.y - spawnPosition.y;
-
-                SimpleLogger.Info("Vehicle", $"Dropping {dropDistance:F1}m to terrain (from Y:{aircraftPosition.y:F2} to Y:{spawnPosition.y:F2})");
-
                 transform.position = spawnPosition;
 
-                // Align rotation with terrain slope
+                // Align rotation with terrain slope (but keep horizontal heading)
+                Vector3 currentEuler = transform.eulerAngles;
                 Quaternion groundRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-                transform.rotation = groundRotation;
+                Quaternion finalRotation = Quaternion.Euler(groundRotation.eulerAngles.x, currentEuler.y, groundRotation.eulerAngles.z);
+                transform.rotation = finalRotation;
 
-                SimpleLogger.Info("Vehicle", $"Spawned ground vehicle at {spawnPosition}, aligned to terrain slope");
+                // CRITICAL: Force Unity to immediately update physics system with new transform
+                // Without this, the physics engine may still use the old position for several frames
+                Physics.SyncTransforms();
+
+                SimpleLogger.Info("Vehicle", $"Spawned ground vehicle at {spawnPosition} (physics synced)");
+
+                // Verify position was actually set
+                Vector3 verifyPos = transform.position;
+                SimpleLogger.Info("Vehicle", $"Position verification: {verifyPos}, delta from spawn: {(verifyPos - spawnPosition).magnitude:F3}m");
             }
             else
             {
-                // No terrain found, spawn at current position with level rotation
-                transform.rotation = Quaternion.identity;
-                SimpleLogger.Warning("Vehicle", "No terrain found below aircraft, spawning ground vehicle at current position");
+                // No terrain found - just level the rotation
+                Vector3 currentEuler = transform.eulerAngles;
+                transform.rotation = Quaternion.Euler(0f, currentEuler.y, 0f);
+                SimpleLogger.Warning("Vehicle", "No terrain found below aircraft - remaining at current position with level rotation");
             }
 
-            // Zero all physics velocities
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            // Disable aircraft controller immediately to stop gravity during spawn delay
+            if (aircraftController != null)
+            {
+                aircraftController.enabled = false;
+                SimpleLogger.Info("Vehicle", "Disabled AircraftController during ground spawn delay");
+            }
+            if (flightInputHandler != null)
+            {
+                flightInputHandler.enabled = false;
+            }
 
-            // Configure rigidbody for ground mode
+            // Re-enable collider and physics after brief delay
+            if (capsuleCollider != null)
+            {
+                StartCoroutine(ReenableColliderAfterDelay(colliderReenableDelay));
+            }
+        }
+
+        /// <summary>
+        /// Coroutine to re-enable collider after spawn delay and activate ground controller
+        /// </summary>
+        private System.Collections.IEnumerator ReenableColliderAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            // Verify position remained stable during kinematic period
+            Vector3 positionAfterDelay = transform.position;
+            SimpleLogger.Info("Vehicle", $"Position after {delay}s kinematic delay: {positionAfterDelay}");
+
+            // Re-enable physics and configure for ground mode
+            rb.isKinematic = false;
             rb.mass = 1500f;
             rb.linearDamping = 0.1f;
             rb.angularDamping = 1f;
             rb.useGravity = false;  // GroundVehicleController applies custom gravity
+            SimpleLogger.Info("Vehicle", "Restored Rigidbody physics for ground mode");
+
+            CapsuleCollider capsuleCollider = GetComponent<CapsuleCollider>();
+            if (capsuleCollider != null)
+            {
+                capsuleCollider.enabled = true;
+                SimpleLogger.Info("Vehicle", "Re-enabled CapsuleCollider after ground spawn");
+            }
+
+            // Re-enable CesiumGlobeAnchor to restore geospatial positioning
+            CesiumGlobeAnchor globeAnchor = GetComponent<CesiumGlobeAnchor>();
+            if (globeAnchor != null)
+            {
+                globeAnchor.enabled = true;
+                SimpleLogger.Info("Vehicle", "Re-enabled CesiumGlobeAnchor after ground spawn");
+            }
+
+            // Now it's safe to enable ground vehicle controller
+            Debug.LogWarning("[VehicleMode] Calling UpdateComponentStates after collider re-enable...");
+            UpdateComponentStates(currentMode);
+            Debug.LogWarning("[VehicleMode] UpdateComponentStates COMPLETED");
+
+            // Notify listeners (camera, HUD, etc.)
+            OnModeChanged?.Invoke(currentMode);
+
+            SimpleLogger.Info("Vehicle", $"Mode switch to {currentMode} complete");
+            Debug.LogWarning($"[VehicleMode] COMPLETE: Mode switch to {currentMode}");
         }
 
         /// <summary>
@@ -175,6 +264,17 @@ namespace GeoGame3D.Vehicles
         /// </summary>
         private void TransitionToAircraftMode()
         {
+            // Ensure collider is enabled for aircraft mode
+            CapsuleCollider capsuleCollider = GetComponent<CapsuleCollider>();
+            if (capsuleCollider != null && !capsuleCollider.enabled)
+            {
+                capsuleCollider.enabled = true;
+                SimpleLogger.Info("Vehicle", "Re-enabled CapsuleCollider for aircraft mode");
+            }
+
+            // Ensure rigidbody is not kinematic
+            rb.isKinematic = false;
+
             // Level the rotation (zero pitch and roll, keep heading)
             Vector3 eulerAngles = transform.eulerAngles;
             transform.rotation = Quaternion.Euler(0f, eulerAngles.y, 0f);

@@ -22,6 +22,7 @@ namespace GeoGame3D.Vehicles
         [SerializeField] private float suspensionDistance = 0.5f;  // How far raycasts go
         [SerializeField] private float suspensionStiffness = 25000f;  // Spring force
         [SerializeField] private float suspensionDamping = 2000f;     // Damping force
+        [SerializeField] private float maxGroundDetectionDistance = 100f;  // Max distance for initial ground detection (spawning/falling)
         [SerializeField] private LayerMask terrainLayer;  // What to raycast against
 
         [Header("Movement")]
@@ -117,7 +118,8 @@ namespace GeoGame3D.Vehicles
 
                 Vector3 wheelPos = wheels[i].wheelTransform.position;
                 Vector3 rayStart = wheelPos + transform.up * (wheelRadius * 0.5f);
-                float rayDistance = suspensionDistance + wheelRadius;
+                // Use longer distance to detect ground even when falling/spawning
+                float rayDistance = maxGroundDetectionDistance;
 
                 RaycastHit hit;
                 if (Physics.Raycast(rayStart, -transform.up, out hit, rayDistance, terrainLayer))

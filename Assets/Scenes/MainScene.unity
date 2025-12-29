@@ -6186,6 +6186,7 @@ MonoBehaviour:
   suspensionDistance: 0.5
   suspensionStiffness: 25000
   suspensionDamping: 2000
+  maxGroundDetectionDistance: 100
   terrainLayer:
     serializedVersion: 2
     m_Bits: 4294967295
