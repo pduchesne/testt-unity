@@ -24,7 +24,7 @@ namespace GeoGame3D.Vehicles
         [SerializeField] private VehicleMode startMode = VehicleMode.Aircraft;
 
         [Header("Ground Mode Spawn")]
-        [SerializeField] private float groundSpawnHeight = 5f;  // Height above terrain to spawn
+        [SerializeField] private float groundSpawnHeight = 0.1f;  // Height above terrain to spawn (small offset to prevent penetration)
         [SerializeField] private float colliderReenableDelay = 0.5f;  // Delay before re-enabling collider after spawn
         [SerializeField] private float maxTerrainCheckDistance = 1000f;  // Max raycast distance
         [SerializeField] private LayerMask terrainLayer;  // Terrain layer for raycasting
@@ -236,7 +236,11 @@ namespace GeoGame3D.Vehicles
             if (capsuleCollider != null)
             {
                 capsuleCollider.enabled = true;
-                SimpleLogger.Info("Vehicle", "Re-enabled CapsuleCollider after ground spawn");
+
+                // Force physics to immediately detect collisions with ground
+                Physics.SyncTransforms();
+
+                SimpleLogger.Info("Vehicle", "Re-enabled CapsuleCollider after ground spawn (physics synced)");
             }
 
             // Re-enable CesiumGlobeAnchor to restore geospatial positioning
