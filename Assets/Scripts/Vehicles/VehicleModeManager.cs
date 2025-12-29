@@ -93,12 +93,15 @@ namespace GeoGame3D.Vehicles
             currentMode = mode;
 
             SimpleLogger.Info("Vehicle", $"Switching from {previousMode} to {currentMode} mode");
+            Debug.LogWarning($"[VehicleMode] START: Switching from {previousMode} to {currentMode} mode");
 
             if (performTransition)
             {
                 if (currentMode == VehicleMode.Ground)
                 {
+                    Debug.LogWarning("[VehicleMode] Calling TransitionToGroundMode...");
                     TransitionToGroundMode();
+                    Debug.LogWarning("[VehicleMode] TransitionToGroundMode COMPLETED");
                 }
                 else
                 {
@@ -107,12 +110,15 @@ namespace GeoGame3D.Vehicles
             }
 
             // Enable/disable appropriate components
+            Debug.LogWarning("[VehicleMode] Calling UpdateComponentStates...");
             UpdateComponentStates(currentMode);
+            Debug.LogWarning("[VehicleMode] UpdateComponentStates COMPLETED");
 
             // Notify listeners (camera, HUD, etc.)
             OnModeChanged?.Invoke(currentMode);
 
             SimpleLogger.Info("Vehicle", $"Mode switch to {currentMode} complete");
+            Debug.LogWarning($"[VehicleMode] COMPLETE: Mode switch to {currentMode}");
         }
 
         /// <summary>
@@ -211,48 +217,48 @@ namespace GeoGame3D.Vehicles
         {
             bool isAircraft = (mode == VehicleMode.Aircraft);
 
-            SimpleLogger.Info("Vehicle", $"UpdateComponentStates: Setting to {mode} mode (isAircraft={isAircraft})");
+            Debug.LogWarning($"[VehicleMode] UpdateComponentStates: Setting to {mode} mode (isAircraft={isAircraft})");
 
             // Aircraft components
             if (aircraftController != null)
             {
                 aircraftController.enabled = isAircraft;
-                SimpleLogger.Info("Vehicle", $"  AircraftController: {aircraftController.enabled}");
+                Debug.LogWarning($"[VehicleMode]   AircraftController: {aircraftController.enabled}");
             }
             else
             {
-                SimpleLogger.Warning("Vehicle", "  AircraftController is NULL!");
+                Debug.LogError("[VehicleMode]   AircraftController is NULL!");
             }
 
             if (flightInputHandler != null)
             {
                 flightInputHandler.enabled = isAircraft;
-                SimpleLogger.Info("Vehicle", $"  FlightInputHandler: {flightInputHandler.enabled}");
+                Debug.LogWarning($"[VehicleMode]   FlightInputHandler: {flightInputHandler.enabled}");
             }
             else
             {
-                SimpleLogger.Warning("Vehicle", "  FlightInputHandler is NULL!");
+                Debug.LogError("[VehicleMode]   FlightInputHandler is NULL!");
             }
 
             // Ground vehicle components
             if (groundVehicleController != null)
             {
                 groundVehicleController.enabled = !isAircraft;
-                SimpleLogger.Info("Vehicle", $"  GroundVehicleController: {groundVehicleController.enabled}");
+                Debug.LogWarning($"[VehicleMode]   GroundVehicleController: {groundVehicleController.enabled}");
             }
             else
             {
-                SimpleLogger.Warning("Vehicle", "  GroundVehicleController is NULL!");
+                Debug.LogError("[VehicleMode]   GroundVehicleController is NULL!");
             }
 
             if (groundVehicleInputHandler != null)
             {
                 groundVehicleInputHandler.enabled = !isAircraft;
-                SimpleLogger.Info("Vehicle", $"  GroundVehicleInputHandler: {groundVehicleInputHandler.enabled}");
+                Debug.LogWarning($"[VehicleMode]   GroundVehicleInputHandler: {groundVehicleInputHandler.enabled}");
             }
             else
             {
-                SimpleLogger.Warning("Vehicle", "  GroundVehicleInputHandler is NULL!");
+                Debug.LogError("[VehicleMode]   GroundVehicleInputHandler is NULL!");
             }
         }
 

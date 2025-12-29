@@ -5918,7 +5918,6 @@ GameObject:
   - component: {fileID: 1329578268}
   - component: {fileID: 1329578270}
   - component: {fileID: 1329578269}
-  - component: {fileID: 1329578271}
   m_Layer: 0
   m_Name: Aircraft
   m_TagString: Untagged
@@ -6200,42 +6199,6 @@ MonoBehaviour:
   lateralFriction: 0.98
   gravity: 20
   slopeAlignmentSpeed: 5
---- !u!114 &1329578271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1329578259}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f14e1eb550b9a4fb6c0a2f0456845b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CesiumForUnity::CesiumForUnity.CesiumGlobeAnchor
-  _adjustOrientationForGlobeWhenMoving: 1
-  _detectTransformChanges: 1
-  _localToGlobeFixedMatrix:
-    c0:
-      x: 1
-      y: 0
-      z: 0
-      w: 0
-    c1:
-      x: 0
-      y: 1
-      z: 0
-      w: 0
-    c2:
-      x: 0
-      y: 0
-      z: 1
-      w: 0
-    c3:
-      x: 0
-      y: 0
-      z: 0
-      w: 1
-  _localToGlobeFixedMatrixIsValid: 0
 --- !u!1 &1418373756
 GameObject:
   m_ObjectHideFlags: 0
