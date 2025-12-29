@@ -174,8 +174,7 @@ namespace GeoGame3D.Vehicles
             if (brakeInput)
             {
                 // Braking
-                Vector3 brakeForce = -forwardDir * brakeForce * rb.mass;
-                rb.AddForce(brakeForce);
+                rb.AddForce(-forwardDir * brakeForce * rb.mass);
             }
             else if (accelerationInput != 0f)
             {
