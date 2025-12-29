@@ -120,32 +120,47 @@ namespace GeoGame3D.Vehicles
         /// </summary>
         private void TransitionToGroundMode()
         {
+            // Store current aircraft position for safety checks
+            Vector3 aircraftPosition = transform.position;
+
             // Find terrain below current position
-            Vector3 rayStart = transform.position;
             RaycastHit hit;
 
-            SimpleLogger.Info("Vehicle", $"Raycasting from {rayStart} down to find terrain");
+            SimpleLogger.Info("Vehicle", $"Raycasting from {aircraftPosition} down to find terrain");
 
-            if (Physics.Raycast(rayStart, Vector3.down, out hit, maxTerrainCheckDistance, terrainLayer))
+            if (Physics.Raycast(aircraftPosition, Vector3.down, out hit, maxTerrainCheckDistance, terrainLayer))
             {
                 SimpleLogger.Info("Vehicle", $"Hit terrain: {hit.collider.name} at point {hit.point}, distance {hit.distance}");
 
                 // Position vehicle on terrain
                 Vector3 spawnPosition = hit.point + Vector3.up * groundSpawnHeight;
 
-                // Safety check: ensure we're not spawning below the georeference origin
-                // In Cesium worlds, very negative Y values might indicate hitting the wrong surface
-                if (spawnPosition.y < -100f)
+                // Safety check: ensure spawn isn't way below aircraft (could indicate wrong surface or coordinate issue)
+                // Allow reasonable drops (up to 100m) but prevent spawning far below starting position
+                float dropDistance = aircraftPosition.y - spawnPosition.y;
+                if (dropDistance > 100f)
                 {
-                    SimpleLogger.Warning("Vehicle", $"Spawn position Y={spawnPosition.y} seems too low, using aircraft Y instead");
-                    spawnPosition.y = transform.position.y - 10f; // Just drop 10m from current position
+                    SimpleLogger.Warning("Vehicle", $"Spawn position would be {dropDistance:F1}m below aircraft (Y: {aircraftPosition.y:F2} -> {spawnPosition.y:F2}), limiting drop to 10m");
+                    spawnPosition = aircraftPosition - Vector3.up * 10f; // Just drop 10m from current position
+                }
+                else
+                {
+                    SimpleLogger.Info("Vehicle", $"Safe spawn: dropping {dropDistance:F1}m to terrain");
                 }
 
                 transform.position = spawnPosition;
 
-                // Align rotation with terrain slope
-                Quaternion groundRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-                transform.rotation = groundRotation;
+                // Align rotation with terrain slope (only if we used the raycast hit position)
+                if (dropDistance <= 100f)
+                {
+                    Quaternion groundRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                    transform.rotation = groundRotation;
+                }
+                else
+                {
+                    // Level rotation if we overrode the spawn position
+                    transform.rotation = Quaternion.identity;
+                }
 
                 SimpleLogger.Info("Vehicle", $"Spawned ground vehicle at {spawnPosition}, aligned to terrain slope");
             }
@@ -196,17 +211,49 @@ namespace GeoGame3D.Vehicles
         {
             bool isAircraft = (mode == VehicleMode.Aircraft);
 
+            SimpleLogger.Info("Vehicle", $"UpdateComponentStates: Setting to {mode} mode (isAircraft={isAircraft})");
+
             // Aircraft components
             if (aircraftController != null)
+            {
                 aircraftController.enabled = isAircraft;
+                SimpleLogger.Info("Vehicle", $"  AircraftController: {aircraftController.enabled}");
+            }
+            else
+            {
+                SimpleLogger.Warning("Vehicle", "  AircraftController is NULL!");
+            }
+
             if (flightInputHandler != null)
+            {
                 flightInputHandler.enabled = isAircraft;
+                SimpleLogger.Info("Vehicle", $"  FlightInputHandler: {flightInputHandler.enabled}");
+            }
+            else
+            {
+                SimpleLogger.Warning("Vehicle", "  FlightInputHandler is NULL!");
+            }
 
             // Ground vehicle components
             if (groundVehicleController != null)
+            {
                 groundVehicleController.enabled = !isAircraft;
+                SimpleLogger.Info("Vehicle", $"  GroundVehicleController: {groundVehicleController.enabled}");
+            }
+            else
+            {
+                SimpleLogger.Warning("Vehicle", "  GroundVehicleController is NULL!");
+            }
+
             if (groundVehicleInputHandler != null)
+            {
                 groundVehicleInputHandler.enabled = !isAircraft;
+                SimpleLogger.Info("Vehicle", $"  GroundVehicleInputHandler: {groundVehicleInputHandler.enabled}");
+            }
+            else
+            {
+                SimpleLogger.Warning("Vehicle", "  GroundVehicleInputHandler is NULL!");
+            }
         }
 
         /// <summary>
