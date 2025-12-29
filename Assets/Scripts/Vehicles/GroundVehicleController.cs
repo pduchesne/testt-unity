@@ -332,11 +332,24 @@ namespace GeoGame3D.Vehicles
             {
                 Debug.LogWarning($"[GroundVehicle] FAILSAFE TRIGGERED: Vehicle airborne for {consecutiveAirborneFrames} frames, attempting respawn...");
 
-                // Raycast down to find terrain
+                // Try raycasting DOWN first to find terrain
                 RaycastHit hit;
                 Vector3 rayStart = transform.position;
+                bool terrainFound = false;
 
                 if (Physics.Raycast(rayStart, Vector3.down, out hit, maxGroundDetectionDistance, terrainLayer))
+                {
+                    terrainFound = true;
+                    Debug.LogWarning($"[GroundVehicle] FAILSAFE: Found terrain BELOW at {hit.point}");
+                }
+                // If not found below, try raycasting UP (vehicle may have fallen through terrain)
+                else if (Physics.Raycast(rayStart, Vector3.up, out hit, maxGroundDetectionDistance, terrainLayer))
+                {
+                    terrainFound = true;
+                    Debug.LogWarning($"[GroundVehicle] FAILSAFE: Found terrain ABOVE at {hit.point}");
+                }
+
+                if (terrainFound)
                 {
                     // Found terrain, respawn above it
                     Vector3 respawnPos = hit.point + Vector3.up * failsafeRespawnHeight;
