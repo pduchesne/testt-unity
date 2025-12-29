@@ -26,6 +26,7 @@ namespace GeoGame3D.Vehicles
         [Header("Ground Mode Spawn")]
         [SerializeField] private float groundSpawnHeight = 0.1f;  // Height above terrain to spawn (small offset to prevent penetration)
         [SerializeField] private float colliderReenableDelay = 0.5f;  // Delay before re-enabling collider after spawn
+        [SerializeField] private int physicsSettleFrames = 10;  // Number of FixedUpdate frames to wait after re-enabling collider before restoring physics
         [SerializeField] private float maxTerrainCheckDistance = 1000f;  // Max raycast distance
         [SerializeField] private LayerMask terrainLayer;  // Terrain layer for raycasting
 
@@ -224,24 +225,33 @@ namespace GeoGame3D.Vehicles
             Vector3 positionAfterDelay = transform.position;
             SimpleLogger.Info("Vehicle", $"Position after {delay}s kinematic delay: {positionAfterDelay}");
 
-            // Re-enable physics and configure for ground mode
+            // Re-enable collider WHILE STILL KINEMATIC to let collision detection settle
+            CapsuleCollider capsuleCollider = GetComponent<CapsuleCollider>();
+            if (capsuleCollider != null)
+            {
+                capsuleCollider.enabled = true;
+                Physics.SyncTransforms();
+                SimpleLogger.Info("Vehicle", "Re-enabled CapsuleCollider (still kinematic for collision settling)");
+            }
+
+            // Wait for physics to settle (collision detection needs time to recognize ground contact)
+            // Stay kinematic for N FixedUpdate frames to let Unity's collision system detect ground
+            SimpleLogger.Info("Vehicle", $"Waiting {physicsSettleFrames} FixedUpdate frames for collision detection to settle...");
+            for (int i = 0; i < physicsSettleFrames; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+
+            Vector3 positionAfterSettle = transform.position;
+            SimpleLogger.Info("Vehicle", $"Position after {physicsSettleFrames} settle frames: {positionAfterSettle}");
+
+            // NOW restore physics - collision detection should recognize ground contact
             rb.isKinematic = false;
             rb.mass = 1500f;
             rb.linearDamping = 0.1f;
             rb.angularDamping = 1f;
             rb.useGravity = false;  // GroundVehicleController applies custom gravity
-            SimpleLogger.Info("Vehicle", "Restored Rigidbody physics for ground mode");
-
-            CapsuleCollider capsuleCollider = GetComponent<CapsuleCollider>();
-            if (capsuleCollider != null)
-            {
-                capsuleCollider.enabled = true;
-
-                // Force physics to immediately detect collisions with ground
-                Physics.SyncTransforms();
-
-                SimpleLogger.Info("Vehicle", "Re-enabled CapsuleCollider after ground spawn (physics synced)");
-            }
+            SimpleLogger.Info("Vehicle", "Restored Rigidbody physics for ground mode (after collision settle)");
 
             // Re-enable CesiumGlobeAnchor to restore geospatial positioning
             CesiumGlobeAnchor globeAnchor = GetComponent<CesiumGlobeAnchor>();
@@ -252,7 +262,7 @@ namespace GeoGame3D.Vehicles
             }
 
             // Now it's safe to enable ground vehicle controller
-            Debug.LogWarning("[VehicleMode] Calling UpdateComponentStates after collider re-enable...");
+            Debug.LogWarning("[VehicleMode] Calling UpdateComponentStates after physics restore...");
             UpdateComponentStates(currentMode);
             Debug.LogWarning("[VehicleMode] UpdateComponentStates COMPLETED");
 

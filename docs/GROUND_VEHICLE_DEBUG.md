@@ -91,7 +91,7 @@ Vehicle was spawning at correct position but immediately falling through terrain
 - But fell 72 meters immediately when physics restored ✗
 - **Root cause:** Spawning 5m above ground meant vehicle had 5m gap to fall when physics re-enabled
 
-**Iteration 6 (FINAL FIX):**
+**Iteration 6:**
 - **Reduced `groundSpawnHeight` from 5f to 0.1f** - spawn essentially ON the ground
   - Since collider is disabled during spawn, no risk of penetration
   - 0.1m is minimal safety margin
@@ -107,20 +107,44 @@ Vehicle was spawning at correct position but immediately falling through terrain
   - Trigger camera and HUD updates
 - **Added position verification logging** to track any movement during kinematic period
 
+**Result:** Vehicle remained stable during kinematic delay BUT still fell immediately after physics restored. Scene configuration had spawn height at 2m (not 0.1m), causing larger fall distance.
+
+**Iteration 7 (Extended Kinematic Period - CURRENT FIX):**
+- **Root cause identified:** Unity's collision detection needs time to recognize ground contact
+  - When collider re-enabled and physics restored simultaneously, collision system hasn't registered ground contact yet
+  - Vehicle has no ground constraint during first FixedUpdate, so gravity causes immediate fall
+- **New approach:** Extended kinematic period AFTER collider re-enable
+  - Re-enable collider while STILL kinematic (`rb.isKinematic = true`)
+  - Wait for `physicsSettleFrames` (10) FixedUpdate cycles
+  - This gives Unity's collision detection time to settle and recognize ground contact
+  - THEN restore physics (`rb.isKinematic = false`)
+- Modified `ReenableColliderAfterDelay()` coroutine:
+  ```csharp
+  1. Re-enable collider (while kinematic)
+  2. Physics.SyncTransforms()
+  3. Wait for 10 FixedUpdate frames (collision settle period)
+  4. Verify position still stable
+  5. Restore physics
+  6. Enable controllers
+  ```
+
 **Critical insights learned:**
 - Making Rigidbody kinematic is the ONLY way to guarantee zero movement during spawn delay
 - Kinematic flag must be set BEFORE changing transform.position to prevent physics corrective forces
 - Physics.SyncTransforms() forces immediate physics engine update (needed twice: after position set, after collider re-enable)
 - CesiumGlobeAnchor can override Unity position if not temporarily disabled
 - **Spawn height must match physics restoration timing:** High spawn (5m) with disabled collider = immediate fall when physics restores
-- **Solution:** Spawn at ground level (0.1m) so collider is touching ground when re-enabled
+- **Collision detection needs time:** Re-enabling collider and restoring physics simultaneously = no ground contact recognized
+- **Solution:** Re-enable collider first, wait for collision detection to settle (10 FixedUpdate frames), THEN restore physics
 
-Vehicle now:
+Vehicle now (expected):
 1. Remains perfectly stationary at spawn position during kinematic delay
-2. Spawns essentially on ground level (not 5m above)
-3. Has collider immediately touching ground when physics restores
-4. Wheels detect ground contact on first FixedUpdate
-5. No falling, no penetration, stable spawn
+2. Spawns essentially on ground level (0.1m above terrain)
+3. Collider re-enabled while kinematic
+4. Collision detection settles over 10 frames (0.2 seconds at 50Hz)
+5. Physics restored with ground contact already established
+6. Wheels detect ground contact immediately
+7. No falling, no penetration, stable spawn
 
 ## How to Test Ground Vehicle Mode
 

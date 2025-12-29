@@ -510,6 +510,28 @@
       ],
       "status": "completed",
       "progress": 100
+    },
+    {
+      "id": "IMPL-025",
+      "title": "Debug ground vehicle spawn physics issue",
+      "description": "Extensive debugging of ground vehicle falling through terrain on mode switch. Attempted 7 iterations of fixes:\n- Iteration 1-4: Disabled collider, controllers, set kinematic during spawn\n- Iteration 5: Vehicle stable during kinematic delay but fell 72m after physics restore\n- Iteration 6: Reduced spawn height from 5m to 0.1m\n- Iteration 7: Extended kinematic period - keep rigidbody kinematic for 10 FixedUpdate frames after collider re-enable to allow collision detection to settle\n\nRoot cause: Unity's collision detection needs time to recognize ground contact. When collider and physics restored simultaneously, vehicle has no ground constraint during first FixedUpdate.\n\nStatus: UNRESOLVED - Vehicle still falls through terrain despite all attempted fixes. May require alternative approach (WheelColliders, different collision shape, or spawning in aircraft mode then transitioning).",
+      "implements": [
+        "REQ-F016"
+      ],
+      "component": "Vehicle System",
+      "priority": "high",
+      "dependencies": [
+        "IMPL-023",
+        "IMPL-024"
+      ],
+      "deliverables": [
+        "Extended kinematic period implementation",
+        "Bidirectional failsafe raycasting",
+        "Comprehensive debug documentation",
+        "7 iterations of physics fixes attempted"
+      ],
+      "status": "in-progress",
+      "progress": 70
     }
   ],
   "milestones": [
