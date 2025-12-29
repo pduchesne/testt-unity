@@ -124,10 +124,23 @@ namespace GeoGame3D.Vehicles
             Vector3 rayStart = transform.position;
             RaycastHit hit;
 
+            SimpleLogger.Info("Vehicle", $"Raycasting from {rayStart} down to find terrain");
+
             if (Physics.Raycast(rayStart, Vector3.down, out hit, maxTerrainCheckDistance, terrainLayer))
             {
+                SimpleLogger.Info("Vehicle", $"Hit terrain: {hit.collider.name} at point {hit.point}, distance {hit.distance}");
+
                 // Position vehicle on terrain
                 Vector3 spawnPosition = hit.point + Vector3.up * groundSpawnHeight;
+
+                // Safety check: ensure we're not spawning below the georeference origin
+                // In Cesium worlds, very negative Y values might indicate hitting the wrong surface
+                if (spawnPosition.y < -100f)
+                {
+                    SimpleLogger.Warning("Vehicle", $"Spawn position Y={spawnPosition.y} seems too low, using aircraft Y instead");
+                    spawnPosition.y = transform.position.y - 10f; // Just drop 10m from current position
+                }
+
                 transform.position = spawnPosition;
 
                 // Align rotation with terrain slope
