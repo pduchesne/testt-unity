@@ -41,6 +41,11 @@ namespace GeoGame3D.Vehicles
         [SerializeField] private float gravity = 20f;  // Custom gravity
         [SerializeField] private float slopeAlignmentSpeed = 5f;  // How fast to align to terrain
 
+        [Header("Failsafe")]
+        [SerializeField] private float failsafeCheckInterval = 1f;  // Check every N seconds
+        [SerializeField] private float failsafeRespawnHeight = 1f;  // Height above terrain to respawn
+        [SerializeField] private int consecutiveAirborneLimitBeforeRespawn = 100;  // Number of consecutive airborne frames before respawn
+
         // Physics state
         private Rigidbody rb;
         private WheelState[] wheels;
@@ -50,6 +55,10 @@ namespace GeoGame3D.Vehicles
         private float accelerationInput = 0f;  // -1 to 1
         private float steeringInput = 0f;      // -1 to 1
         private bool brakeInput = false;
+
+        // Failsafe state
+        private float lastFailsafeCheckTime = 0f;
+        private int consecutiveAirborneFrames = 0;
 
         // Public properties for HUD
         public float Speed => rb.linearVelocity.magnitude;
@@ -97,6 +106,7 @@ namespace GeoGame3D.Vehicles
             ApplyGroundAlignment();
             ApplyFriction();
             ApplyGravity();
+            CheckFailsafeRespawn();
         }
 
         /// <summary>
@@ -291,6 +301,78 @@ namespace GeoGame3D.Vehicles
         private void ApplyGravity()
         {
             rb.AddForce(Vector3.down * gravity * rb.mass);
+        }
+
+        /// <summary>
+        /// Failsafe: Check if vehicle has fallen below ground and respawn if needed
+        /// </summary>
+        private void CheckFailsafeRespawn()
+        {
+            // Track consecutive airborne frames
+            if (!IsGrounded)
+            {
+                consecutiveAirborneFrames++;
+            }
+            else
+            {
+                consecutiveAirborneFrames = 0;
+                return;  // Vehicle is grounded, no failsafe needed
+            }
+
+            // Only check periodically to reduce performance impact
+            if (Time.time - lastFailsafeCheckTime < failsafeCheckInterval)
+            {
+                return;
+            }
+
+            lastFailsafeCheckTime = Time.time;
+
+            // If vehicle has been airborne for too long, attempt respawn
+            if (consecutiveAirborneFrames > consecutiveAirborneLimitBeforeRespawn)
+            {
+                Debug.LogWarning($"[GroundVehicle] FAILSAFE TRIGGERED: Vehicle airborne for {consecutiveAirborneFrames} frames, attempting respawn...");
+
+                // Raycast down to find terrain
+                RaycastHit hit;
+                Vector3 rayStart = transform.position;
+
+                if (Physics.Raycast(rayStart, Vector3.down, out hit, maxGroundDetectionDistance, terrainLayer))
+                {
+                    // Found terrain, respawn above it
+                    Vector3 respawnPos = hit.point + Vector3.up * failsafeRespawnHeight;
+
+                    Debug.LogWarning($"[GroundVehicle] FAILSAFE: Terrain found at {hit.point}, respawning at {respawnPos}");
+
+                    // Make kinematic temporarily to prevent physics interference
+                    bool wasKinematic = rb.isKinematic;
+                    rb.isKinematic = true;
+
+                    // Set position and level rotation
+                    transform.position = respawnPos;
+                    Vector3 euler = transform.eulerAngles;
+                    transform.rotation = Quaternion.Euler(0f, euler.y, 0f);
+
+                    // Zero velocities
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+
+                    // Restore physics
+                    rb.isKinematic = wasKinematic;
+
+                    Physics.SyncTransforms();
+
+                    // Reset counter
+                    consecutiveAirborneFrames = 0;
+
+                    Debug.LogWarning($"[GroundVehicle] FAILSAFE COMPLETE: Vehicle respawned successfully");
+                }
+                else
+                {
+                    Debug.LogError($"[GroundVehicle] FAILSAFE FAILED: No terrain found within {maxGroundDetectionDistance}m below vehicle!");
+                    // Reset counter to prevent spam
+                    consecutiveAirborneFrames = 0;
+                }
+            }
         }
 
         /// <summary>
