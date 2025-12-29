@@ -140,33 +140,15 @@ namespace GeoGame3D.Vehicles
 
                 // Position vehicle on terrain
                 Vector3 spawnPosition = hit.point + Vector3.up * groundSpawnHeight;
-
-                // Safety check: ensure spawn isn't way below aircraft (could indicate wrong surface or coordinate issue)
-                // Allow reasonable drops (up to 100m) but prevent spawning far below starting position
                 float dropDistance = aircraftPosition.y - spawnPosition.y;
-                if (dropDistance > 100f)
-                {
-                    SimpleLogger.Warning("Vehicle", $"Spawn position would be {dropDistance:F1}m below aircraft (Y: {aircraftPosition.y:F2} -> {spawnPosition.y:F2}), limiting drop to 10m");
-                    spawnPosition = aircraftPosition - Vector3.up * 10f; // Just drop 10m from current position
-                }
-                else
-                {
-                    SimpleLogger.Info("Vehicle", $"Safe spawn: dropping {dropDistance:F1}m to terrain");
-                }
+
+                SimpleLogger.Info("Vehicle", $"Dropping {dropDistance:F1}m to terrain (from Y:{aircraftPosition.y:F2} to Y:{spawnPosition.y:F2})");
 
                 transform.position = spawnPosition;
 
-                // Align rotation with terrain slope (only if we used the raycast hit position)
-                if (dropDistance <= 100f)
-                {
-                    Quaternion groundRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-                    transform.rotation = groundRotation;
-                }
-                else
-                {
-                    // Level rotation if we overrode the spawn position
-                    transform.rotation = Quaternion.identity;
-                }
+                // Align rotation with terrain slope
+                Quaternion groundRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                transform.rotation = groundRotation;
 
                 SimpleLogger.Info("Vehicle", $"Spawned ground vehicle at {spawnPosition}, aligned to terrain slope");
             }
