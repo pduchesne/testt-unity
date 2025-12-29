@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.cesium.unity": "file:/home/pduchesne/Sources/claude/hilats/com.cesium.unity.linux",
+    "com.cesium.unity": "1.20.0",
     "com.ivanmurzak.unity.mcp": "0.21.0",
     "com.unity.ai.navigation": "2.0.9",
     "com.unity.collab-proxy": "2.10.2",
