@@ -1,6 +1,6 @@
 using UnityEngine;
 using GeoGame3D.Aircraft;
-using GeoGame3D.Logging;
+using GeoGame3D.Utils;
 
 namespace GeoGame3D.Vehicles
 {
