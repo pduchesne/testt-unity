@@ -104,10 +104,16 @@ namespace GeoGame3D.Vehicles
         private void UpdateWheelGroundDetection()
         {
             GroundedWheelCount = 0;
+            int frameModCheck = Time.frameCount % 60; // Log every 60 frames when debugging
 
             for (int i = 0; i < wheels.Length; i++)
             {
-                if (wheels[i].wheelTransform == null) continue;
+                if (wheels[i].wheelTransform == null)
+                {
+                    if (frameModCheck == 0)
+                        Debug.LogWarning($"[GroundVehicle] Wheel {i} transform is NULL!");
+                    continue;
+                }
 
                 Vector3 wheelPos = wheels[i].wheelTransform.position;
                 Vector3 rayStart = wheelPos + transform.up * (wheelRadius * 0.5f);
@@ -132,7 +138,17 @@ namespace GeoGame3D.Vehicles
                     wheels[i].isGrounded = false;
                     wheels[i].compression = 0f;
                     wheels[i].previousCompression = 0f;
+
+                    if (frameModCheck == 0)
+                    {
+                        Debug.LogWarning($"[GroundVehicle] Wheel {i} raycast MISS: from {rayStart} down {rayDistance}m, terrainLayer={terrainLayer.value}");
+                    }
                 }
+            }
+
+            if (frameModCheck == 0 && GroundedWheelCount == 0)
+            {
+                Debug.LogWarning($"[GroundVehicle] NO WHEELS GROUNDED! Position: {transform.position}, terrainLayer mask: {terrainLayer.value}");
             }
         }
 
