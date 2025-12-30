@@ -142,6 +142,17 @@ package_build() {
             source_dir="${BUILD_OUTPUT_DIR}/Mac"
             # For DMG creation, we need hdiutil (macOS only)
             if command -v hdiutil &> /dev/null; then
+                # Fix executable permissions
+                chmod +x "${source_dir}/FlightSim.app/Contents/MacOS/"*
+
+                # Remove quarantine attributes and ad-hoc sign
+                xattr -cr "${source_dir}/FlightSim.app"
+                codesign --force --deep --sign - "${source_dir}/FlightSim.app"
+
+                # Verify signature
+                codesign --verify --deep --verbose=2 "${source_dir}/FlightSim.app"
+
+                # Create DMG
                 hdiutil create -volname "FlightSim" -srcfolder "${source_dir}" -ov -format UDZO "${BUILD_OUTPUT_DIR}/${archive_name}"
             else
                 log_warn "hdiutil not found - creating tar.gz instead of DMG"

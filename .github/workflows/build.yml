@@ -131,6 +131,16 @@ jobs:
           VERSION="${{ github.event.inputs.version || github.ref_name }}"
           VERSION="${VERSION#v}"
 
+          # Fix executable permissions
+          chmod +x "Builds/Mac/FlightSim.app/Contents/MacOS/"*
+
+          # Remove quarantine attributes and ad-hoc sign
+          xattr -cr "Builds/Mac/FlightSim.app"
+          codesign --force --deep --sign - "Builds/Mac/FlightSim.app"
+
+          # Verify signature
+          codesign --verify --deep --verbose=2 "Builds/Mac/FlightSim.app"
+
           # Create DMG
           hdiutil create -volname "FlightSim" -srcfolder "Builds/Mac" -ov -format UDZO "FlightSim_Mac_v${VERSION}.dmg"
 
